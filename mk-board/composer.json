@@ -1,0 +1,24 @@
+{
+  "name": "chu/mk-board",
+  "autoload": {
+    "psr-4": {
+      "Controller\\" : "Controller/",
+      "Model\\" : "Model/",
+      "Migration\\": "DB/Migration/",
+      "DB\\" : "DB/",
+      "Utils\\" : "Utils/",
+      "Route\\" : "Route/"
+    }
+  },
+  "authors": [
+    {
+      "name": "gyoyoon",
+      "email": "yoon7548@gmail.com"
+    }
+  ],
+  "require": {
+    "ext-pdo": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*"
+  }
+}

@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /mk-board
+    RewriteCond %{REQUEST_FILENAME} !^/view/404\.php
+    RewriteCond %{REQUEST_URI} !^/mk-board/assets/
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>

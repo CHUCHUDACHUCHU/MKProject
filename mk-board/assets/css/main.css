@@ -1,0 +1,344 @@
+/*main.css*/
+
+/* ========== Page Common ========== */
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+body{
+    width: 100%;
+    margin: 0 auto;
+    background-color: rgb(59,65,64);
+}
+
+h1{
+    font-size: 30px;
+    margin-bottom: 4rem;
+}
+
+ul{
+    list-style: none;
+}
+
+a{
+    text-decoration: none;
+}
+
+/* ========== Header ========== */
+header{
+    top: 0;
+    width: 90%;
+    height: 5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    background-color: rgb(29,26,24);
+    padding: 0 6rem;
+}
+
+header ul{
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+header li{
+    margin: 0 1rem;
+}
+
+header nav a{
+    color: rgb(185,131,31);
+    font-size: 1.25rem;
+}
+
+header nav a:hover{
+    color: rgb(185,131,44);
+}
+
+/* 활성화된 네비게이션 항목에 적용될 스타일 */
+header nav ul li a.active {
+    color: red; /* 예시로 빨간색으로 지정 */
+    font-weight: bold; /* 글꼴을 두껍게 설정 */
+    /* 추가적인 스타일을 여기에 추가할 수 있습니다. */
+}
+
+
+#logo{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: rgb(238,164,80);
+    text-transform: uppercase;
+}
+/* ========== Main ==========*/
+.wrap{
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+input:not(input[type="submit"]){
+    border: 1px solid rgb(211, 203, 203);
+    width: 25rem;
+    height: 3.2rem;
+    margin: 5px;
+    padding-left: 10px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 18px;
+}
+
+.wrap .form_btn{
+    width: 25rem;
+    height: 3.2rem;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid rgb(238,164,0 );
+    background-color: rgb(238,164,0 );
+    color: rgb(255,255,255);
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
+/*myinfo.css*/
+/* ========== Myinfo ========== */
+#myinfo_wrap section{
+    width: 100rem;
+    height: 30rem;
+    padding: 10rem 0;
+    margin-top: 6rem;
+    background-color: rgb(255,255,255);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 6px 4px rgba(0,0,0,0.2);
+    border-radius: 7px;
+    text-align: center;
+}
+
+#content_wrap{
+    display: flex;
+    justify-content: space-between;
+}
+
+#img_content{
+    width: 20rem;
+    height: 20rem;
+    margin: 3rem;
+}
+
+#img_content img{
+    width: 100%;
+}
+
+#flex_content{
+    display: flex;
+    flex-direction: column;
+}
+
+.content{
+    background-color: rgb(155, 155, 155);
+    width: 60rem;
+    height: 10rem;
+    border-radius: 5px;
+    margin-right: 10rem;
+}
+.content_data{
+    font-size: 16px;
+    margin: 1.5rem 2rem;
+    text-align: center;
+}
+
+
+
+
+/*main.css*/
+*{
+    font-family: 'Noto Sans KR', sans-serif;
+    color:rgb(59,65,64);
+}
+#board_wrap{
+    margin-top: 7rem;
+}
+#board_wrap section{
+    background-color: rgb(255, 253, 249);
+    border-radius: 7px;
+    width: 80rem;
+    height: 42rem;
+}
+#board_main{
+    height:36.6rem;
+    position:relative;
+}
+#board{
+
+    margin: 0 auto;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+}
+#board thead tr th{
+    background-color: rgb(238,164,80);
+    padding: 0.25rem;
+    font-size: 24px;
+    border-bottom: 3px solid rgb(189, 130, 64);
+}
+#board tbody tr{
+    height: 1.5rem;
+}
+#board tbody tr td{
+    padding: 0.75rem;
+    font-size: 20px;
+    border-bottom: 1px solid rgb(189, 130, 64);
+}
+#page_nums{
+    height:3rem;
+    align-items: center;
+    display:flex;
+    justify-content: center;
+}
+.page_num{
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 4px;
+}
+#cur_page{
+    color: rgb(238,164,80);
+}
+#page_title{
+    font-size:24px;
+    font-weight:bold;
+    margin-left:36rem;
+}
+#write_btn{
+    width: 5rem;
+    height: 2.5rem;
+    padding: 5px;
+    margin: 0.3rem 1rem;
+    border: 1px solid rgb(238,164,0 );
+    background-color: rgb(238,164,0 );
+    color:rgb(255,255,255);
+    position: absolute;
+    bottom: 4.6rem;
+    right: 18rem;
+}
+#board_header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.page_str{
+    padding: 0 4px;
+}
+
+
+
+
+
+
+/*join.css*/
+/* ========== Page Common ========== */
+
+h1{
+    margin-bottom: 1rem;
+}
+
+/* ========== Header ========== */
+
+header{
+    padding: 0 5rem;
+}
+
+/* ========== Main ==========*/
+
+#join_wrap{
+    width: 31.2rem;
+    height: 45rem;
+    margin: 10rem auto;
+    background-color: rgb(255, 255, 255);
+}
+
+#check_email_btn,
+#addr_search_btn {
+    position: relative;
+    top: -2px;
+    width: 50px;
+    margin-left: 0;
+    padding-left: 0;
+    border: 0;
+    box-sizing:content-box;
+    background-color: rgb(238,164,0);
+    font-size: 12px;
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+}
+
+#join_wrap #join_form #result {
+    display: none;
+}
+
+.pre_btn a{
+    color:rgb(238,164,0);
+}
+
+
+
+
+
+
+
+/*index.css*/
+/* ========== Page Common ========== */
+html{
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+/* ========== Main ========== */
+#login_wrap{
+    width: 31.2rem;
+    height: 41rem;
+    margin: 10rem auto;
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 6px 4px rgba(0, 0, 0, 0.2);
+}
+
+section{
+    padding: 4rem 0;
+}
+
+input:not(input[type="submit"]){
+    border: 1px solid rgb(211, 203, 203);
+    width: 25rem;
+    height: 3.2rem;
+    margin: 5px;
+    padding-left: 10px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 18px;
+}
+
+#forget_pw{
+    padding: 0.5rem;
+}
+
+#join_btn a,
+#forget_pw a{
+    color: rgb(238,164,0);
+}
+
