@@ -3,7 +3,7 @@ require_once "bootstrap.php";
 
 use Route\PostRoute;
 
-// URL 요청
+// URL 요청!!!
 $url = isset($_GET['url']) ? $_GET['url'] : '/';
 
 // 루트 경로로 접근 시 게시글 목록으로 리다이렉트
