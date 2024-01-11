@@ -7,7 +7,6 @@ class BaseModel {
     protected $conn;
 
     public function __construct() {
-        $this->conn = new connection();
-        $this->conn = $this->conn->getConnection();
+        $this->conn = Connection::getConnection();
     }
 }
