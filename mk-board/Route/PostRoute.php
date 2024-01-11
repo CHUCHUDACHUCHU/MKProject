@@ -11,7 +11,7 @@ class PostRoute extends BaseRoute {
 
         // TODO: Implement routing() method.
         if($this->routeCheck($url, "post/list", "GET")) {
-            return $this->requireView('index');
+            return $this->requireView('main');
         } else if ($this->routeCheck($url, "post/read", "GET")) {
             return $this->requireView('postRead');
         } else if ($this->routeCheck($url, "post/create", "GET")) {

@@ -1,11 +1,15 @@
 <!doctype html>
 <?php
+include "session.php";
 include "part/head.php";
 ?>
 <body>
+    <?php
+    include "part/nav.php";
+    ?>
 <div class="m-4">
     <div class="container mt-5">
-        <h3 class="d-inline"><a href="/mk-board">MK게시판</a></h3>/<h4 class="d-inline">글 작성</h4>
+        <h4 class="d-inline">view/createPost 파일!!!</h4>
         <p class="mt-1">글을 작성하는 공간입니다.</p>
 
         <form action="/mk-board/post/create" method="post">

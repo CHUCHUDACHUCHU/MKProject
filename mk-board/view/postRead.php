@@ -1,8 +1,8 @@
 <!doctype html>
 <?php
+include "session.php";
 use Model\Post;
 use Model\User;
-include "session.php";
 
 $user = new User();
 $nowUser = $user->getUserById($_SESSION['userIdx']);
@@ -19,7 +19,7 @@ include "part/head.php";
 
 <div class="m-4">
     <div class="container mt-5">
-        <h3 class="d-inline"><a href="/mk-board">MK게시판</a></h3>/<h4 class="d-inline">글 읽기</h4>
+        <h4 class="d-inline">view/postRead 파일!</h4>
         <p class="mt-1 mb-3">글의 상세 내용입니다!!!</p>
         <hr/>
         <?php
