@@ -1,11 +1,22 @@
 <!doctype html>
 <?php
-
 use Model\Post;
+use Model\User;
+include "session.php";
+
+$user = new User();
+$nowUser = $user->getUserById($_SESSION['userIdx']);
+
 
 include "part/head.php";
 ?>
 <body>
+
+    <?php
+    include "part/nav.php";
+    ?>
+
+
 <div class="m-4">
     <div class="container mt-5">
         <h3 class="d-inline"><a href="/mk-board">MK게시판</a></h3>/<h4 class="d-inline">글 읽기</h4>

@@ -3,6 +3,11 @@ namespace Controller;
 
 use Model\Post;
 
+/**
+ * PostController
+ * Route에서 컨트롤러 사용.
+ * 게시글 관련 액션
+ */
 class PostController extends BaseController {
     private $post;
 
@@ -10,6 +15,9 @@ class PostController extends BaseController {
         $this->post = new Post();
     }
 
+    /**
+     * Post 생성하기
+     */
     public function create() {
         $userIdx = $_POST['userIdx'];
         $title = $_POST['title'];

@@ -1,18 +1,20 @@
 <?php
-//
-//namespace MKBoard\Route;
-//
-//class UserRoute extends BaseRoute
-//{
-//    function routing($url): bool
-//    {
-//        // 게시글 목록에 대한 라우팅
-//        if ($this->routeCheck($url, "checkEmail", "GET")) {
-//            return $this->requireView('index');
-//        } else {
-//            return false;
-//        }
-//    }
-//}
-//
-//?>
+
+namespace Route;
+
+use Controller\UserController;
+
+class UserRoute extends BaseRoute {
+    function routing($url): bool
+    {
+        $UserController = new UserController();
+
+        // TODO: Implement routing() method.
+        if($this->routeCheck($url, "user/create", "POST")) {
+            $UserController->create();
+            return true;
+        }else {
+            return false;
+        }
+    }
+}

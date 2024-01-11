@@ -1,0 +1,21 @@
+.btn-primary, .badge-primary, .page-item, .bg-primary{
+    background-color: #ff9800 !important;
+}
+
+.page-link{
+    color: #ff9800 !important;
+}
+
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff !important;
+    background-color: #ff9800;
+    border-color: #ff9800;
+}
+
+.navbar-brand {
+    color: black !important;
+    font-size: 30px;
+    font-weight: 800;
+}

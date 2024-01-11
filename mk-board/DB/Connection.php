@@ -16,7 +16,8 @@ class Connection {
         if($this->conn == null) {
             try {
                 //db 연결
-                $dsn = "mysql:host={$this->config['DB_HOSTNAME']};charset=utf8";
+//                $dsn = "mysql:host={$this->config['DB_HOSTNAME']};charset=utf8mb4";
+                $dsn = "mysql:host={$this->config['DB_HOSTNAME']};";
                 $conn = new PDO($dsn, $this->config['DB_USER'], $this->config['DB_PASSWORD']);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
