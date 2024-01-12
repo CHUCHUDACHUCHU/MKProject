@@ -10,7 +10,9 @@ class UserRoute extends BaseRoute {
         $UserController = new UserController();
 
         // TODO: Implement routing() method.
-        if($this->routeCheck($url, "user/create", "POST")) {
+        if($this->routeCheck($url, "user/read", "GET")) {
+            return $this->requireView('userRead');
+        } else if($this->routeCheck($url, "user/create", "POST")) {
             $UserController->create();
             return true;
         }else {

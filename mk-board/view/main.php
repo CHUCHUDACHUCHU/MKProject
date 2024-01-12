@@ -64,7 +64,7 @@ include "part/head.php";
             $startIndex = ($currentPage - 1) * $perPage;
 
             // 전체 게시글 수
-            $total = $post->count($searchWord);
+            $total = $post->countAll($searchWord);
 
             // 전체 페이지 개수
             $totalPage = ceil($total / $perPage);

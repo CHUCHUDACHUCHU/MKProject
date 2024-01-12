@@ -39,9 +39,39 @@ class Post extends BaseModel {
         }
     }
 
+    public function getMyPosts(int $userIdx, string $search, int $start, int $perPage): array
+    {
+        try {
+            $query = "select	
+                                p.*,
+                                u.userName,
+                                u.userEmail,
+		                        (select count(*) from comments c where c.postIdx = p.postIdx) as comment_count,
+                                case when timestampdiff(minute, p.created_at, now()) <= 1440 then 1
+                                else 0 end as is_new
+                                from posts p
+                                join users u on p.userIdx = u.userIdx
+                                where u.userIdx = :userIdx and p.title like :search and p.deleted_at is null
+                                order by p.postIdx desc limit :start, :perPage;";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam('userIdx', $userIdx, PDO::PARAM_INT);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+            $stmt->bindParam('start', $start, PDO::PARAM_INT);
+            $stmt->bindParam('perPage', $perPage, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+
     /**
      * Post 데이터 가져오기
-     * @param $postIdx int Post의 postIdx
+     * @param int $postIdx
      * @return array|mixed
      */
     public function getPost(int $postIdx)
@@ -67,12 +97,12 @@ class Post extends BaseModel {
 
     /**
      * Post 추가
-     * @param $userIdx
-     * @param $title
-     * @param $content
+     * @param int $userIdx
+     * @param string $title
+     * @param string $content
      * @return bool
      */
-    public function create($userIdx, $title, $content): bool
+    public function create(int $userIdx, string $title, string $content): bool
     {
         try {
             $query = "INSERT INTO posts (userIdx, title,content) VALUES (:userIdx, :title, :content)";
@@ -89,12 +119,12 @@ class Post extends BaseModel {
 
     /**
      * Post 수정
-     * @param $postIdx
-     * @param $title
-     * @param $content
+     * @param int $postIdx
+     * @param string $title
+     * @param string $content
      * @return bool
      */
-    public function update($postIdx, $title, $content): bool
+    public function update(int $postIdx, string $title, string $content): bool
     {
         try {
             $query = "update posts set title =:title, content =:content  where postIdx =:postIdx";
@@ -111,10 +141,10 @@ class Post extends BaseModel {
 
     /**
      * Post 삭제 (논리적!)
-     * @param $postIdx
+     * @param int $postIdx
      * @return bool
      */
-    public function delete($postIdx): bool {
+    public function delete(int $postIdx): bool {
         try {
             $query = "update posts set deleted_at = NOW() where postIdx =:postIdx";
             return $this->conn->prepare($query)->execute([
@@ -129,10 +159,10 @@ class Post extends BaseModel {
 
     /**
      * Post 목록의 개수
-     * @param $search string 검색어
+     * @param string $search
      * @return int|mixed
      */
-    public function count(string $search)
+    public function countAll(string $search): int
     {
         try {
             $query = "SELECT count(postIdx) FROM posts WHERE title like :search";
@@ -147,11 +177,33 @@ class Post extends BaseModel {
     }
 
     /**
+     * Post 목록의 개수
+     * @param int $userIdx
+     * @param string $search
+     * @return int|mixed
+     */
+    public function countMine(int $userIdx, string $search): int
+    {
+        try {
+            $query = "SELECT count(postIdx) FROM posts WHERE title like :search and userIdx =:userIdx";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+            $stmt->bindValue('userIdx', $userIdx);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return 0;
+        }
+    }
+
+
+    /**
      * Post 조회 수 증가
-     * @param $postIdx int Post의 postIdx
+     * @param int $postIdx
      * @return bool|void
      */
-    public function increaseViews($postIdx): bool
+    public function increaseViews(int $postIdx): bool
     {
         try {
             // post_views 쿠키가 없으면 조회수 증가
