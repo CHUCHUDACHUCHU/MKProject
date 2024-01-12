@@ -14,13 +14,17 @@ class Post extends BaseModel {
     public function getAllPosts(string $search, int $start, int $perPage): array
     {
         try {
-            $query = "select	p.*,
+            $query = "select	
+                                p.*,
+                                u.userName,
+                                u.userEmail,
 		                        (select count(*) from comments c where c.postIdx = p.postIdx) as comment_count,
                                 case when timestampdiff(minute, p.created_at, now()) <= 1440 then 1
                                 else 0 end as is_new
                                 from posts p
+                                join users u on p.userIdx = u.userIdx
                                 where p.title like :search
-                                order by postIdx desc limit :start, :perPage;";
+                                order by p.postIdx desc limit :start, :perPage;";
 
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue('search', '%' . ($search ?? '') . '%');
@@ -43,7 +47,12 @@ class Post extends BaseModel {
     public function getPost(int $postIdx)
     {
         try {
-            $query = "SELECT * FROM posts WHERE postIdx = :postIdx LIMIT 1";
+            $query = "select
+                                p.*,
+                                u.userName
+                                from posts p
+                                join users u on p.userIdx = u.userIdx
+                                where postIdx = :postIdx LIMIT 1";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 'postIdx' => $postIdx
@@ -76,6 +85,29 @@ class Post extends BaseModel {
             return false;
         }
     }
+
+    /**
+     * Post 수정
+     * @param $postIdx
+     * @param $title
+     * @param $content
+     * @return bool
+     */
+    public function update($postIdx, $title, $content): bool
+    {
+        try {
+            $query = "update posts set title =:title, content =:content  where postIdx =:postIdx";
+            return $this->conn->prepare($query)->execute([
+                'postIdx' => $postIdx,
+                'title' => $title,
+                'content' => $content
+            ]);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * Post 목록의 개수

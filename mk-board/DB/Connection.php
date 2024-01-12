@@ -11,9 +11,8 @@ class Connection {
         // if 문 내부는 $this->conn 문제 있을 시 새로.
         if(self::$conn == null) {
             try {
-                $config = parse_ini_file(__DIR__ . '/../config.ini');
-                echo "<script>alert('dbconn null???')</script>";
                 //db 연결
+                $config = parse_ini_file(__DIR__ . '/../config.ini');
                 $dsn = "mysql:host={$config['DB_HOSTNAME']};charset=utf8mb4";
                 self::$conn = new PDO($dsn, $config['DB_USER'], $config['DB_PASSWORD']);
                 self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

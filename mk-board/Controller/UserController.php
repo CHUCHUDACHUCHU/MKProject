@@ -23,7 +23,7 @@ class UserController extends BaseController {
 
         if($this->parametersCheck($userName, $userEmail, $userPw, $userDepart, $userPhone)) {
             if($this->user->create($userName, $userEmail, $userPw, $userDepart, $userPhone)) {
-                $this->redirect('/mk-board', '회원이 생성되었습니다.');
+                $this->redirect('/mk-board/post/list', '회원이 생성되었습니다.');
             } else {
                 $this->redirectBack('회원이 생성에 실패했습니다.');
             }

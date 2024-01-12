@@ -1,6 +1,5 @@
 <!doctype html>
 <?php
-include "session.php";
 include "part/head.php";
 ?>
 <body>
@@ -18,22 +17,16 @@ include "part/head.php";
                 <input type="text" class="form-control" name="title" placeholder="제목을 입력하세요">
             </div>
 
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="userIdx">userIdx</label>
-                    <input type="text" class="form-control" name="userIdx" placeholder="일단 userIdx 자기가 입력">
-                </div>
-            </div>
-
             <div class="form-group">
                 <label for="content">내용</label>
                 <textarea class="form-control" name="content" rows="5" placeholder="내용을 입력하세요"></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary">글쓰기</button>
+            <button type="submit" class="btn btn-primary">완료</button>
         </form>
     </div>
 
 </div>
 </body>
+<script src="../assets/js/index.js"></script>
 </html>

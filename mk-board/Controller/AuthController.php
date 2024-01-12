@@ -29,9 +29,12 @@ class AuthController extends BaseController{
 
             if($rst) {
                 if($rst['userPw'] == $userPw) {
-                    // 비밀번호가 일치합니다. 세션을 저장한 후 /mk-board/post/list로 이동합니다.
-                    session_start();
+                    // 비밀번호가 일치합니다. 세션을 저장한 후 이동합니다.
                     $_SESSION['userIdx'] = $rst['userIdx'];
+                    $_SESSION['userName'] = $rst['userName'];
+                    $_SESSION['userEmail'] = $rst['userEmail'];
+                    $_SESSION['userPhone'] = $rst['userPhone'];
+                    $_SESSION['userDepart'] = $rst['userDepart'];
                     $this->redirect('/mk-board/post/list', '로그인합니다!');
                 } else {
                     $this->redirectBack("비밀번호가 일치하지 않습니다.");
@@ -43,5 +46,24 @@ class AuthController extends BaseController{
         } else {
             $this->redirectBack('입력되지 않은 값이 있습니다.');
         }
+    }
+
+    /**
+     * 로그아웃 기능
+     * 세션정보만 날려주기.
+     */
+    public function logout() {
+        session_unset();
+        $this->redirect('/mk-board/auth/login', '로그아웃합니다!');
+    }
+
+    /**
+     * 세션만료 기능
+     * 세션정보와 쿠키값 날려주기.
+     */
+    public function session() {
+        session_unset();
+        setcookie(session_name(), '', time() - 3600, '/');
+        $this->redirect('/mk-board/auth/login', '세션이 만료되었습니다!');
     }
 }

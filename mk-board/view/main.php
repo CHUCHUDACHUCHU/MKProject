@@ -1,11 +1,7 @@
 <?php
 use Model\Post;
-use Model\User;
-include "session.php";
 
 $post = new Post();
-$user = new User();
-$nowUser = $user->getUserById($_SESSION['userIdx']);
 ?>
 <!doctype html>
 <?php
@@ -20,9 +16,7 @@ include "part/head.php";
 
     <div class="m-4">
         <div id="write_btn" class="mb-4">
-            <p class="d-inline"> MK게시판 로그인 시 첫 화면</p>
-            <p><?= $nowUser['userName'] ?></p>
-            <a href="./create">
+            <a href="/mk-board/post/create">
                 <button class="btn btn-primary float-right">글쓰기</button>
             </a>
         </div>
@@ -65,7 +59,7 @@ include "part/head.php";
             $searchWord = $_GET['search'] ?? '';
 
             // 페이지마다 보여줄 아이템 개수
-            $perPage = 10;
+            $perPage = 20;
             // 페이지의 시작 인덱스 값
             $startIndex = ($currentPage - 1) * $perPage;
 
@@ -92,10 +86,10 @@ include "part/head.php";
                     }
                     ?>
 
-                    <tr>
+                    <tr class="text-center">
                         <td><?= $postInfo['postIdx'] ?></td>
                         <td>
-                            <a href="./read?postIdx=<?= $postInfo['postIdx'] ?>">
+                            <a href="/mk-board/post/read?postIdx=<?= $postInfo['postIdx'] ?>">
                                 <?= $title . " [" . $postInfo['comment_count'] . "]"; ?>
                                 <?php if ($postInfo['is_new']) { ?>
                                     <span class="badge badge-primary">new</span>
@@ -116,26 +110,28 @@ include "part/head.php";
             </tbody>
         </table>
         <!-- 페이지네이션 -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                <li class="page-item">
-                    <a class="page-link" data-page="1" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                <?php
-                for ($page = max($currentPage - 4, 1); $page <= $endPage; $page++) {
-                    $isActive = $page == $currentPage ? 'active' : '';
-                    echo "<li class='page-item $isActive'><span class='page-link' data-page='$page'>$page</span></li>";
-                }
-                ?>
-                <li class="page-item">
-                    <a class="page-link" data-page="<?= $totalPage ?>" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <div class="d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a class="page-link" data-page="1" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <?php
+                    for ($page = max($currentPage - 4, 1); $page <= $endPage; $page++) {
+                        $isActive = $page == $currentPage ? 'active' : '';
+                        echo "<li class='page-item $isActive'><span class='page-link' data-page='$page'>$page</span></li>";
+                    }
+                    ?>
+                    <li class="page-item">
+                        <a class="page-link" data-page="<?= $totalPage ?>" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
 </body>
 <script src="../assets/js/index.js"></script>

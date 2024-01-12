@@ -16,6 +16,10 @@
 
 .navbar-brand {
     color: black !important;
-    font-size: 30px;
-    font-weight: 800;
+    font-size: 40px !important;
+    font-weight: 800 !important;
+}
+
+.navbar-collapse {
+    font-size: 20px;
 }
