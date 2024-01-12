@@ -48,8 +48,25 @@ class PostController extends BaseController {
         if ($this->parametersCheck($postIdx,$title,$content)) {
             // POST 데이터 생성
             if ($this->post->update($postIdx, $title, $content)) {
-                $this->redirect('/mk-board/post/list', '글이 수정되었습니다.');
+                $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '글이 수정되었습니다.');
             } else {
+                $this->redirectBack('글 작성에 실패했습니다.');
+            }
+        } else {
+            $this->redirectBack('입력되지 않은 값이 있습니다.');
+        }
+    }
+
+    /**
+     * Post 삭제하기 (논리적!)
+     */
+    public function delete() {
+        $postIdx = $_POST['postIdx'];
+        // 데이터 유효성 검사
+        if ($this->parametersCheck($postIdx)) {
+            if ($this->post->delete($postIdx)) {
+                $this->redirect('/mk-board/post/lists', '글이 삭제되었습니다.');
+            }else {
                 $this->redirectBack('글 작성에 실패했습니다.');
             }
         } else {

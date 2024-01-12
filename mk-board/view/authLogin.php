@@ -33,7 +33,7 @@ include "part/head.php";
                     <ul>
                         <li>로그인, 로그아웃 기능</li>
                         <li>전체게시글 확인, 검색, 페이지네이션</li>
-                        <li>게시글 작성, 수정</li>
+                        <li>게시글 작성, 수정, 삭제</li>
                     </ul>
                 </div>
             </div>

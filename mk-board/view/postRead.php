@@ -29,7 +29,6 @@ include "part/head.php";
                     <p>관리자의 승인이 필요합니다. 관리자이시면 아래에 email과 pw를 입력해주세요.</p>
                     <p>혹은? 그냥 승인 버튼있음, 근데 관리자가 아니라면 alert!</p>
                     <div class="form-group">
-                        <input type="hidden" name="postIdx" value="<?= $postIdx ?>">
                         <label for="pw">Password</label>
                         <input id="pw" type="text" class="form-control" name="pw" placeholder="비밀번호를 입력하세요">
                     </div>
@@ -63,7 +62,10 @@ include "part/head.php";
 
                 <a href="/mk-board/post/update?postIdx=<?= $postInfo['postIdx'] ?>" class="btn btn-primary">수정하기</a>
                 <a href="/mk-board/post/list" class="btn btn-secondary">목록</a>
-                <a href="/mk-board/post/delete?postIdx=<?= $postInfo['postIdx'] ?>" class="btn btn-dark">삭제하기</a>
+                <form action="/mk-board/post/delete" method="post">
+                    <input type="hidden" name="postIdx" value="<?= $postInfo['postIdx'] ?>">
+                    <button type="submit" class="btn btn-primary">삭제하기</button>
+                </form>
                 <?php
             }
         } else {

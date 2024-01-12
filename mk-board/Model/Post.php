@@ -23,7 +23,7 @@ class Post extends BaseModel {
                                 else 0 end as is_new
                                 from posts p
                                 join users u on p.userIdx = u.userIdx
-                                where p.title like :search
+                                where p.title like :search and p.deleted_at is null
                                 order by p.postIdx desc limit :start, :perPage;";
 
             $stmt = $this->conn->prepare($query);
@@ -52,7 +52,8 @@ class Post extends BaseModel {
                                 u.userName
                                 from posts p
                                 join users u on p.userIdx = u.userIdx
-                                where postIdx = :postIdx LIMIT 1";
+                                where postIdx = :postIdx and p.deleted_at is null
+                                LIMIT 1";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 'postIdx' => $postIdx
@@ -101,6 +102,23 @@ class Post extends BaseModel {
                 'postIdx' => $postIdx,
                 'title' => $title,
                 'content' => $content
+            ]);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Post 삭제 (논리적!)
+     * @param $postIdx
+     * @return bool
+     */
+    public function delete($postIdx): bool {
+        try {
+            $query = "update posts set deleted_at = NOW() where postIdx =:postIdx";
+            return $this->conn->prepare($query)->execute([
+                'postIdx' => $postIdx
             ]);
         } catch (PDOException $e) {
             error_log($e->getMessage());
