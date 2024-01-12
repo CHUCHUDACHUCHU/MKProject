@@ -4,9 +4,9 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <div class="container-fluid">
             <div class="navbar-nav mx-auto"> <!-- mx-auto: 가운데 정렬 클래스 -->
-                <a class="nav-link" href="/mk-board/post/list" id="homeLink">Home</a>
-                <a class="nav-link" href="/mk-board/user/read" id="mypageLink">MyPage</a>
-                <a class="nav-link" href="/mk-board/user/read" id="mypageLink">👤 <?= $_SESSION['userName'] ?>
+                <a class="nav-link" href="/mk-board/post/list" id="homeNav">Home</a>
+                <a class="nav-link" href="/mk-board/user/read" id="myPageNav">MyPage</a>
+                <a class="nav-link" href="/mk-board/user/read">👤 <?= $_SESSION['userName'] ?>
                     <span style="font-weight: bold; color: black; font-size: 15px"> 님</span>
                 </a>
             </div>

@@ -60,12 +60,14 @@ include "part/head.php";
                     </div>
                 </div>
 
-                <a href="/mk-board/post/update?postIdx=<?= $postInfo['postIdx'] ?>" class="btn btn-primary">수정하기</a>
-                <a href="/mk-board/post/list" class="btn btn-secondary">목록</a>
-                <form action="/mk-board/post/delete" method="post">
-                    <input type="hidden" name="postIdx" value="<?= $postInfo['postIdx'] ?>">
-                    <button type="submit" class="btn btn-primary">삭제하기</button>
-                </form>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="/mk-board/post/update?postIdx=<?= $postInfo['postIdx'] ?>" class="btn btn-primary mr-2">수정하기</a>
+                    <form action="/mk-board/post/delete" method="post" class="mr-2">
+                        <input type="hidden" name="postIdx" value="<?= $postInfo['postIdx'] ?>">
+                        <button type="submit" class="btn btn-primary" style="background-color: orangered !important;">삭제하기</button>
+                    </form>
+                    <a href="/mk-board/post/list" class="btn btn-primary mr-2">목록</a>
+                </div>
                 <?php
             }
         } else {
@@ -74,5 +76,4 @@ include "part/head.php";
         ?>
     </div>
 </body>
-<script src="/mk-board/assets/js/index.js"></script>
 </html>

@@ -34,5 +34,4 @@ include "part/nav.php";
 
 </div>
 </body>
-<script src="../assets/js/index.js"></script>
 </html>

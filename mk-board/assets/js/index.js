@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update the active class based on the current URL
     if (currentPath === "/mk-board/post/list") {
-        document.getElementById("homeLink").classList.add("active");
-    } else if (currentPath === "/mk-board/mypage") { // Adjust the path for MyPage
-        document.getElementById("mypageLink").classList.add("active");
+        document.getElementById("homeNav").classList.add("active");
+    } else if (currentPath === "/mk-board/user/read") { // Adjust the path for MyPage
+        document.getElementById("myPageNav").classList.add("active");
     }
 
 
