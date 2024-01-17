@@ -1,13 +1,12 @@
 <!doctype html>
 <?php
 use Model\Post;
-include "part/head.php";
+include __DIR__ . '/../part/head.php';
 ?>
 <body>
-
-    <?php
-    include "part/nav.php";
-    ?>
+<?php
+include __DIR__ . '/../part/nav.php';
+?>
 
 
 <div class="m-4">
@@ -44,7 +43,7 @@ include "part/head.php";
                 }
                 ?>
                 <div>
-                    <h5 class="d-inline">제목) <?= $postInfo['title'] ?></h5>
+                    <h5 class="d-inline">제목) <?= htmlspecialchars($postInfo['title']) ?></h5>
                     <p class="float-right">글쓴이) <?= $postInfo['userName'] ?></p>
                 </div>
                 <span class="mr-2">작성일: <?= $postInfo['created_at'] ?></span>
@@ -55,7 +54,7 @@ include "part/head.php";
                 <div class="card mb-3">
                     <div class="card-body">
                         <p class="card-text">
-                            <?= nl2br($postInfo['content']) ?>
+                            <?= nl2br(htmlspecialchars($postInfo['content'])) ?>
                         </p>
                     </div>
                 </div>

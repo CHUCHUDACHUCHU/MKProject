@@ -4,11 +4,12 @@ use Model\Post;
 
 $post = new Post();
 $postInfo = $post->getPost($_GET['postIdx']);
-include "part/head.php";
+include __DIR__ . '/../part/head.php';
 ?>
+
 <body>
 <?php
-include "part/nav.php";
+include __DIR__ . '/../part/nav.php';
 ?>
 <div class="m-4">
     <div class="container mt-5">

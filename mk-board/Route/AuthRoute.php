@@ -11,12 +11,12 @@ class AuthRoute extends BaseRoute {
         $AuthController = new AuthController();
 
         if($this->routeCheck($url, "auth/login", "GET")) {
-            return $this->requireView('authLogin');
+            return $this->requireView('auth', 'authLogin');
         } else if($this->routeCheck($url, "auth/logout", "GET")) {
             $AuthController->logout();
             return true;
-        } else if($this->routeCheck($url, "auth/session", "GET")) {
-            $AuthController->session();
+        } else if($this->routeCheck($url, "auth/sessiondout", "GET")) {
+            $AuthController->sessionout();
             return true;
         } else if($this->routeCheck($url, "auth/login", "POST")) {
             $AuthController->login();

@@ -165,7 +165,7 @@ class Post extends BaseModel {
     public function countAll(string $search): int
     {
         try {
-            $query = "SELECT count(postIdx) FROM posts WHERE title like :search";
+            $query = "SELECT count(p.postIdx) FROM posts p WHERE title like :search and p.deleted_at is null";
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue('search', '%' . ($search ?? '') . '%');
             $stmt->execute();
@@ -177,7 +177,7 @@ class Post extends BaseModel {
     }
 
     /**
-     * Post 목록의 개수
+     * Post 자신의 목록의 개수
      * @param int $userIdx
      * @param string $search
      * @return int|mixed
@@ -185,7 +185,7 @@ class Post extends BaseModel {
     public function countMine(int $userIdx, string $search): int
     {
         try {
-            $query = "SELECT count(postIdx) FROM posts WHERE title like :search and userIdx =:userIdx";
+            $query = "SELECT count(p.postIdx) FROM posts p WHERE title like :search and userIdx =:userIdx and p.deleted_at is null";
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue('search', '%' . ($search ?? '') . '%');
             $stmt->bindValue('userIdx', $userIdx);

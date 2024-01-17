@@ -11,9 +11,9 @@ trait RouteUtils{
     }
 
     // 뷰 파일을 require 해줌
-    public function requireView($viewName): bool
+    public function requireView($directory, $viewName): bool
     {
-        require_once(__DIR__ . '/../view/' . $viewName . '.php');
+        require_once(__DIR__ . '/../view/' .$directory. '/' . $viewName . '.php');
         return true;
     }
 }

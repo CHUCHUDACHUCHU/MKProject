@@ -24,18 +24,22 @@ class AuthController extends BaseController{
         $userEmail = $_POST['userEmail'];
         $userPw = $_POST['userPw'];
 
-        if($this->parametersCheck($userEmail, $userPw)) {
+        $salt = '$5$QOPrAVIK$';
+        $hashPw = crypt($userPw, $salt);
+
+        if($this->parametersCheck($userEmail, $hashPw)) {
             $rst = $this->user->getUserByEmail($userEmail);
 
             if($rst) {
-                if($rst['userPw'] == $userPw) {
+                if($rst['userPw'] == $hashPw) {
                     // 비밀번호가 일치합니다. 세션을 저장한 후 이동합니다.
                     $_SESSION['userIdx'] = $rst['userIdx'];
-                    $_SESSION['userName'] = $rst['userName'];
-                    $_SESSION['userEmail'] = $rst['userEmail'];
-                    $_SESSION['userPhone'] = $rst['userPhone'];
-                    $_SESSION['userDepart'] = $rst['userDepart'];
-                    $this->redirect('/mk-board/post/list', '로그인합니다!');
+                    $_SESSION['userStatus'] = $rst['userStatus'];
+                    if($_SESSION['userStatus'] === '대기') {
+                        $this->redirect('/mk-board/user/my-page', '첫 로그인 시 비밀번호 변경이 필요합니다!');
+                    } else {
+                        $this->redirect('/mk-board/post/list', '로그인합니다!');
+                    }
                 } else {
                     $this->redirectBack("비밀번호가 일치하지 않습니다.");
                 }
@@ -61,7 +65,7 @@ class AuthController extends BaseController{
      * 세션만료 기능
      * 세션정보와 쿠키값 날려주기.
      */
-    public function session() {
+    public function sessionout() {
         session_unset();
         setcookie(session_name(), '', time() - 3600, '/');
         $this->redirect('/mk-board/auth/login', '세션이 만료되었습니다!');

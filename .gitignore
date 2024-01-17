@@ -1,3 +1,5 @@
 .idea
 mk-board/config.ini
 mk-board/vendor/
+mk-board/Route/TestRoute.php
+mk-board/view/test/

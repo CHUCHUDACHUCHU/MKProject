@@ -1,10 +1,10 @@
 <!doctype html>
 <?php
-include "part/head.php";
+include __DIR__ . '/../part/head.php';
 ?>
 <body>
     <?php
-    include "part/nav.php";
+    include __DIR__ . '/../part/nav.php';
     ?>
 <div class="m-4">
     <div class="container mt-5">
@@ -15,6 +15,8 @@ include "part/head.php";
             <div class="form-group">
                 <label for="title">Title</label>
                 <input type="text" class="form-control" name="title" placeholder="제목을 입력하세요">
+                <label for="title">userName</label>
+                <input type="text" class="form-control"  value="<?=$nowUser['userName']?>" readonly>
             </div>
 
             <div class="form-group">

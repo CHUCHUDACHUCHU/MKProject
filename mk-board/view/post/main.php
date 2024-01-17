@@ -5,13 +5,13 @@ $post = new Post();
 ?>
 <!doctype html>
 <?php
-include "part/head.php";
+include __DIR__ . '/../part/head.php';
 ?>
 
 <body>
 
     <?php
-    include "part/nav.php";
+    include __DIR__ . '/../part/nav.php';
     ?>
 
     <div class="m-4">
@@ -90,7 +90,7 @@ include "part/head.php";
                         <td><?= $postInfo['postIdx'] ?></td>
                         <td>
                             <a href="/mk-board/post/read?postIdx=<?= $postInfo['postIdx'] ?>">
-                                <?= $title . " [" . $postInfo['comment_count'] . "]"; ?>
+                                <?= htmlspecialchars($title) . " [" . $postInfo['comment_count'] . "]"; ?>
                                 <?php if ($postInfo['is_new']) { ?>
                                     <span class="badge badge-primary">new</span>
                                 <?php } ?>

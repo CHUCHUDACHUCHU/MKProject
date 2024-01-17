@@ -1,28 +1,78 @@
 <!DOCTYPE html>
-<!doctype html>
 <?php
 use Model\Post;
 $post = new Post();
-
-include "part/head.php";
+include __DIR__ . '/../part/head.php';
 ?>
 <body>
 <?php
-include "part/nav.php";
+include __DIR__ . '/../part/nav.php';
 ?>
 <!-- Main Content -->
 <div class="container mt-4">
     <div class="row">
         <!-- Left Side: User Info -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <h3>My Information</h3>
             <img src="/mk-board/assets/img/logo.png" alt="Profile Image" class="img-fluid mb-3">
-            <p><strong>Name:</strong> <?= $_SESSION['userName'] ?></p>
-            <p><strong>Email:</strong> <?= $_SESSION['userEmail'] ?></p>
-            <p><strong>Password:</strong> ********</p>
-            <p><strong>Confirm Password:</strong> ********</p>
-            <p><strong>Department:</strong> <?= $_SESSION['userDepart'] ?></p>
-            <p><strong>Phone Number:</strong> <?= $_SESSION['userPhone'] ?></p>
+            <div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#emailAuthModal" data-bs-whatever="@fat"><span>이메일변경</span></button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap"><span>비밀번호변경</span></button>
+            </div>
+            <form action="/mk-board/user/update" method="post">
+                <div class="form-group mb-1">
+                    <label>userName</label>
+                    <input type="text" class="form-control"  value="<?=$nowUser['userName']?>" name="userName" placeholder="Enter your userName">
+                </div>
+                <div class="form-group mb-1">
+                    <label>userEmail</label>
+                    <input type="text" class="form-control" value="<?=$nowUser['userEmail']?>" name="userEmail" placeholder="Enter your userEmail" readonly >
+                </div>
+                <div class="form-group mb-1">
+                    <label>userStatus</label>
+                    <input type="text" class="form-control" value="<?=$nowUser['userStatus']?>" name="userPhone" placeholder="Enter your userPhone" readonly>
+                </div>
+                <div class="form-group mb-1">
+                    <label>userDepart</label>
+                    <input type="text" class="form-control" value="<?=$nowUser['userDepart']?>" name="userDepart" placeholder="Enter your userDepart">
+                </div>
+                <div class="form-group mb-1">
+                    <label>userPhone</label>
+                    <input type="text" class="form-control" value="<?=$nowUser['userPhone']?>" name="userPhone" placeholder="Enter your userPhone">
+                </div>
+                <div class="btn-group mb-2" role="group" aria-label="Basic example">
+                    <button type="submit" class="btn btn-primary">수정</button>
+                </div>
+            </form>
+
+            <div class="modal fade" id="emailAuthModal" aria-hidden="true" aria-labelledby="emailAuthModalToggleLabel" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="emailAuthModalToggleLabel">이메일 변경</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                                <div class="mb-3 d-flex justify-content-end align-items-center">
+                                    <input type="hidden" id="userName" value="<?= $nowUser['userName'] ?>">
+                                    <input type="email" class="form-control" id="changeEmail" >
+                                    <input class="btn btn-primary emailAuthModalBtn" type="button" value="인증번호 발송">
+                                </div>
+                                <div class="col-md-5 d-flex justify-content-end align-items-center" id="authBox" style="display: none;">
+                                    <input type="text" class="form-control" id="authInputBox" style="display: none;">
+                                    <input class="btn btn-primary authInputBoxBtn" id="authInputBoxBtn" type="button" style="display: none;" value="확인">
+                                    <span id="authCertTime" style="display: none;"></span>
+                                </div>
+                                <span id = "authCertCheckMessage" style="display: block; font-size: 10px"></span>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary emailUpdateBtn" id="emailUpdateBtn">수정</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Right Side: My Posts List -->
@@ -54,7 +104,6 @@ include "part/nav.php";
                         </div>
                     </form>
                 </div>
-
                 <!-- 게시물 목록 테이블 -->
                 <table class="table table-bordered">
                     <thead>
@@ -77,7 +126,7 @@ include "part/nav.php";
                     $startIndex = ($currentPage - 1) * $perPage;
 
                     // 전체 게시글 수
-                    $total = $post->countMine($_SESSION['userIdx'], $searchWord);
+                    $total = $post->countMine($nowUser['userIdx'], $searchWord);
 
                     // 전체 페이지 개수
                     $totalPage = ceil($total / $perPage);
@@ -87,7 +136,7 @@ include "part/nav.php";
                     $endPage = $endPage < 10 && $totalPage > 10 ? 10 : $endPage;
 
                     // 게시글 전체목록 가져오기
-                    $posts = $post->getMyPosts($_SESSION['userIdx'], $searchWord, $startIndex, $perPage);
+                    $posts = $post->getMyPosts($nowUser['userIdx'], $searchWord, $startIndex, $perPage);
 
                     if ($posts) {
                         foreach ($posts as $postInfo) {
@@ -103,7 +152,7 @@ include "part/nav.php";
                                 <td><?= $postInfo['postIdx'] ?></td>
                                 <td>
                                     <a href="/mk-board/post/read?postIdx=<?= $postInfo['postIdx'] ?>">
-                                        <?= $title . " [" . $postInfo['comment_count'] . "]"; ?>
+                                        <?= htmlspecialchars($title) . " [" . $postInfo['comment_count'] . "]"; ?>
                                         <?php if ($postInfo['is_new']) { ?>
                                             <span class="badge badge-primary">new</span>
                                         <?php } ?>
