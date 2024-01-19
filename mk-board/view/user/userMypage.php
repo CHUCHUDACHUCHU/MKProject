@@ -15,61 +15,97 @@ include __DIR__ . '/../part/nav.php';
         <div class="col-md-3">
             <h3>My Information</h3>
             <img src="/mk-board/assets/img/logo.png" alt="Profile Image" class="img-fluid mb-3">
-            <div>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#emailAuthModal" data-bs-whatever="@fat"><span>이메일변경</span></button>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap"><span>비밀번호변경</span></button>
+            <div class="mb-4">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#emailChangeModal"><span>이메일변경</span></button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#passwordChangeModal"><span>비밀번호변경</span></button>
             </div>
-            <form action="/mk-board/user/update" method="post">
+            <form action="/mk-board/user/update/all" method="post">
                 <div class="form-group mb-1">
-                    <label>userName</label>
-                    <input type="text" class="form-control"  value="<?=$nowUser['userName']?>" name="userName" placeholder="Enter your userName">
+                    <label class="mb-1" style="font-weight: bold">이름</label>
+                    <input type="text" class="form-control mb-1"  value="<?=$nowUser['userName']?>" name="userName">
                 </div>
                 <div class="form-group mb-1">
-                    <label>userEmail</label>
-                    <input type="text" class="form-control" value="<?=$nowUser['userEmail']?>" name="userEmail" placeholder="Enter your userEmail" readonly >
+                    <label class="mb-1" style="font-weight: bold">이메일</label>
+                    <input type="text" class="form-control mb-1" value="<?=$nowUser['userEmail']?>" name="userEmail" readonly >
                 </div>
                 <div class="form-group mb-1">
-                    <label>userStatus</label>
-                    <input type="text" class="form-control" value="<?=$nowUser['userStatus']?>" name="userPhone" placeholder="Enter your userPhone" readonly>
+                    <label class="mb-1" style="font-weight: bold">권한</label>
+                    <input type="text" class="form-control mb-1" value="<?=$nowUser['userStatus']?>" name="userPhone" readonly>
                 </div>
                 <div class="form-group mb-1">
-                    <label>userDepart</label>
-                    <input type="text" class="form-control" value="<?=$nowUser['userDepart']?>" name="userDepart" placeholder="Enter your userDepart">
+                    <label class="mb-1" style="font-weight: bold">부서</label>
+                    <input type="text" class="form-control mb-1" value="<?=$nowUser['userDepart']?>" name="userDepart">
                 </div>
                 <div class="form-group mb-1">
-                    <label>userPhone</label>
-                    <input type="text" class="form-control" value="<?=$nowUser['userPhone']?>" name="userPhone" placeholder="Enter your userPhone">
+                    <label class="mb-1" style="font-weight: bold">휴대폰</label>
+                    <input type="text" class="form-control mb-1" value="<?=$nowUser['userPhone']?>" name="userPhone" placeholder="010-0000-0000">
                 </div>
                 <div class="btn-group mb-2" role="group" aria-label="Basic example">
                     <button type="submit" class="btn btn-primary">수정</button>
                 </div>
             </form>
 
-            <div class="modal fade" id="emailAuthModal" aria-hidden="true" aria-labelledby="emailAuthModalToggleLabel" tabindex="-1">
+            <div class="modal fade" id="emailChangeModal" aria-hidden="true" aria-labelledby="emailChangeModalToggleLabel" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="emailAuthModalToggleLabel">이메일 변경</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h1 class="modal-title fs-5" id="emailChangeModalToggleLabel">이메일 변경</h1>
                         </div>
                         <div class="modal-body">
                             <form>
-                                <div class="mb-3 d-flex justify-content-end align-items-center">
-                                    <input type="hidden" id="userName" value="<?= $nowUser['userName'] ?>">
-                                    <input type="email" class="form-control" id="changeEmail" >
-                                    <input class="btn btn-primary emailAuthModalBtn" type="button" value="인증번호 발송">
+                                <div class="mb-5">
+                                    <li><b>변경할 이메일을 입력하세요.</b></li>
                                 </div>
-                                <div class="col-md-5 d-flex justify-content-end align-items-center" id="authBox" style="display: none;">
-                                    <input type="text" class="form-control" id="authInputBox" style="display: none;">
-                                    <input class="btn btn-primary authInputBoxBtn" id="authInputBoxBtn" type="button" style="display: none;" value="확인">
-                                    <span id="authCertTime" style="display: none;"></span>
+                                <div class="mb-3 d-flex">
+                                    <input type="email" class="form-control" id="email" >
+                                    <input class="btn btn-primary verificationCodeSendBtn" type="button" value="인증번호 발송">
                                 </div>
-                                <span id = "authCertCheckMessage" style="display: block; font-size: 10px"></span>
+                                <div class="container">
+                                    <div class="row">
+                                        <input type="text" class="form-control col" id="codeInputBox">
+                                        <input class="btn btn-primary codeInputBoxBtn col-2" id="codeInputBoxBtn" type="button" value="확인">
+                                        <span class="col" id="codeSessionLiveTime"></span>
+                                    </div>
+                                </div>
+                                <span id = "codeCheckMessage" style="display: block; font-size: 10px"></span>
                             </form>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button class="btn btn-primary emailUpdateBtn" id="emailUpdateBtn">수정</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="passwordChangeModal" aria-labelledby="pwChangeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="pwChangeModalLabel">비밀번호 변경</h1>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/mk-board/user/update/password" method="post">
+                            <div class="mb-3">
+                                <label for="nowPassword" class="col-form-label">현재 비밀번호:</label>
+                                <input type="password" class="form-control" id="nowPassword" name="nowPassword">
+                            </div>
+                            <div class="mb-3">
+                                <label for="changePassword" class="col-form-label">새 비밀번호:</label>
+                                <span id = "password-check-message" style="display: block; margin-left: 5px; font-size: 10px"></span>
+                                <input type="password" class="form-control" id="changePassword" name="changePassword" placeholder="Password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="changePasswordCheck" class="col-form-label">비밀번호 확인:</label>
+                                <span id = "password-match-message" style="display: block; margin-left: 5px; font-size: 10px"></span>
+                                <input type="password" class="form-control" id="changePasswordCheck" name="changePasswordCheck" placeholder="Password Check">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="changePasswordBtn" style="display: none">변경</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>

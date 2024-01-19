@@ -47,7 +47,7 @@ trait ControllerUtils   {
      * @param $data array|object
      * @return void
      */
-    public function echoJson($data){
+    public function echoJson(array $data){
         header('Content-Type: application/json');
         echo json_encode($data);
     }
@@ -67,7 +67,8 @@ trait ControllerUtils   {
         return true;
     }
 
-    public function sendEmail($userEmail, $userName, $subject, $body) {
+    public function sendEmail($userEmail, $subject, $body): string
+    {
         $mail = new PHPMailer();
         $mail->CharSet = 'UTF-8';
         $mail->SMTPDebug = SMTP::DEBUG_OFF; // 디버그 모드, DEBUG_OFF 시 출력 없음
@@ -92,7 +93,7 @@ trait ControllerUtils   {
         );
 
         $mail->setFrom('yoon7548@gmail.com', 'MK-Board');
-        $mail->addAddress($userEmail, $userName);
+        $mail->addAddress($userEmail, $userEmail);
 
         // 메일 제목, 내용 세팅
         $mail->isHTML(true);

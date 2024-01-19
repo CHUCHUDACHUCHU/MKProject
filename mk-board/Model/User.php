@@ -58,19 +58,21 @@ class User extends BaseModel {
      * @param $userPw
      * @param $userDepart
      * @param $userPhone
+     * @param $userStatus
      * @return array|mixed
      */
-    public function create($userName, $userEmail, $userPw, $userDepart, $userPhone)
+    public function create($userName, $userEmail, $userPw, $userDepart, $userPhone, $userStatus)
     {
         try {
-            $query = "INSERT INTO users (userName, userEmail, userPw, userDepart, userPhone) 
-                                    VALUES (:userName, :userEmail, :userPw, :userDepart, :userPhone)";
+            $query = "INSERT INTO users (userName, userEmail, userPw, userDepart, userPhone, userStatus) 
+                                    VALUES (:userName, :userEmail, :userPw, :userDepart, :userPhone, :userStatus)";
             return $stmt = $this->conn->prepare($query)->execute([
                 'userName' => $userName,
                 'userEmail' => $userEmail,
                 'userPw' => $userPw,
                 'userDepart' => $userDepart,
-                'userPhone' => $userPhone
+                'userPhone' => $userPhone,
+                'userStatus' => $userStatus
             ]);
         } catch (PDOException  $e) {
             error_log($e->getMessage());
@@ -79,7 +81,33 @@ class User extends BaseModel {
     }
 
     /**
-     * 회원 데이터 생성하기
+     * 회원 데이터 수정하기
+     * 회원 부가 정보 수정하기
+     * @param $userName
+     * @param $userDepart
+     * @param $userPhone
+     * @param $userIdx
+     * @return array|mixed
+     */
+    public function updateAll($userName, $userDepart, $userPhone, $userIdx)
+    {
+        try {
+            $query = "update users set userName =:userName, userDepart =:userDepart, userPhone =:userPhone where userIdx =:userIdx ";
+            return $this->conn->prepare($query)->execute([
+                'userName' => $userName,
+                'userDepart' => $userDepart,
+                'userPhone' => $userPhone,
+                'userIdx' => $userIdx
+            ]);
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 회원 데이터 수정하기
+     * 회원 이메일 수정
      * @param $changeEmail
      * @param $userIdx
      * @return array|mixed
@@ -97,6 +125,54 @@ class User extends BaseModel {
             return false;
         }
     }
+
+    /**
+     * 회원 데이터 수정하기
+     * 회원 비밀번호 수정
+     * @param $userIdx
+     * @param $changePassword
+     * @param $userInit
+     * @return array|mixed
+     */
+    public function updatePassword($userIdx, $changePassword, $userInit)
+    {
+        try {
+            if($userInit === 0) {
+                $query = "update users set userPw =:changePassword, userInit =1 where userIdx =:userIdx ";
+            } else {
+                $query = "update users set userPw =:changePassword where userIdx =:userIdx ";
+            }
+            return $this->conn->prepare($query)->execute([
+                'userIdx' => $userIdx,
+                'changePassword' => $changePassword
+            ]);
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 회원 데이터 수정하기
+     * 회원 비밀번호 초기화
+     * @param $userEmail
+     * @param $changePassword
+     * @return array|mixed
+     */
+    public function resetPassword($userEmail, $changePassword)
+    {
+        try {
+            $query = "update users set userPw =:changePassword, userInit = 0 where userEmail =:userEmail ";
+            return $this->conn->prepare($query)->execute([
+                'userEmail' => $userEmail,
+                'changePassword' => $changePassword
+            ]);
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
 
 
     /**

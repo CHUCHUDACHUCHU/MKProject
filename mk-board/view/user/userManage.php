@@ -150,6 +150,17 @@ include __DIR__ . '/../part/nav.php';
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label>권한</label>
+                            <div class="input-group">
+                                <select class="form-select form-control" id="inputGroupSelect01" name="userStatus">
+                                    <option selected>Choose...</option>
+                                    <option value="일반">일반</option>
+                                    <option value="관리자">관리자</option>
+                                    <option value="중지">중지</option>
+                                </select>
+                            </div>
+                        </div>
 
 
                         <button type="submit" class="btn btn-primary float-right"

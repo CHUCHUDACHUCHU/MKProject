@@ -25,10 +25,43 @@ include __DIR__ . '/../part/head.php';
                         <button type="submit" class="btn btn-primary btn-block">Login</button>
                     </form>
                     <div class="mt-3 text-center">
-                        <a href="#">Forgot your password?</a>
+                        <a href="" data-bs-toggle="modal" data-bs-target="#resetPasswordModal"><span>Forgot your Password?</span></a>
                     </div>
-                    <br></br>
-                    <span style="font-size: small; font-weight: bolder">임시 계정[아이디 : a, 비밀번호 : a]로 로그인하실 수 있습니다.</span><br>
+                    <div class="modal fade" id="resetPasswordModal" aria-hidden="true" aria-labelledby="resetPasswordModalToggleLabel" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="resetPasswordModalToggleLabel">비밀번호 초기화</h1>
+                                </div>
+                                <div class="modal-body">
+                                    <form>
+                                        <div class="mb-5">
+                                            <li><b>이메일 인증을 하신 후 초기화 버튼을 누르세요.</b></li>
+                                            <li><b>해당 이메일로 초기화 된 비밀번호가 제공됩니다.</b></li>
+                                        </div>
+                                        <div class="mb-3 d-flex">
+                                            <input type="email" class="form-control" id="email" >
+                                            <input class="btn btn-primary verificationCodeSendBtn" type="button" value="인증번호 발송">
+                                        </div>
+                                        <div class="container">
+                                            <div class="row">
+                                                <input type="text" class="form-control col" id="codeInputBox">
+                                                <input class="btn btn-primary codeInputBoxBtn col-2" id="codeInputBoxBtn" type="button" value="확인">
+                                                <span class="col" id="codeSessionLiveTime"></span>
+                                            </div>
+                                        </div>
+                                        <span id = "codeCheckMessage" style="display: block; font-size: 10px"></span>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button class="btn btn-primary resetPasswordBtn" id="resetPasswordBtn">초기화</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </br>
+                    <span style="font-size: small; font-weight: bolder">임시 계정[아이디 : admin, 비밀번호 : c]로 로그인하실 수 있습니다.</span><br>
                     <span style="font-size: small; font-weight: bolder; color: #ff9800">현재 가능한 기능</span>
                     <ul>
                         <li>로그인, 로그아웃 기능</li>

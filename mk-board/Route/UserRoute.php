@@ -17,21 +17,27 @@ class UserRoute extends BaseRoute {
         } else if($this->routeCheck($url, "user/create", "POST")) {
             $UserController->create();
             return true;
+        } else if($this->routeCheck($url, "user/update/all", "POST")) {
+            $UserController->updateAll();
+            return true;
         } else if($this->routeCheck($url, "user/update/email", "POST")) {
             $UserController->updateEmail();
             return true;
+        } else if($this->routeCheck($url, "user/update/password", "POST")) {
+            $UserController->updatePassword();
+            return true;
+        } else if($this->routeCheck($url, "user/reset/password", "POST")) {
+            $UserController->resetPassword();
+            return true;
         } else if($this->routeCheck($url, "user/manage", "GET")) {
             return $this->requireView('user', 'userManage');
-        } else if($this->routeCheck($url, "user/emailDupCheck", "GET")) {
-            $UserController->getUserByEmail();
+        } else if($this->routeCheck($url, 'user/code/send', 'POST')) {
+            $UserController->codeSend();
             return true;
-        } else if($this->routeCheck($url, 'user/send-cert', 'POST')) {
-            $UserController->sendCert();
+        } else if($this->routeCheck($url, 'user/code/check', 'POST')) {
+            $UserController->codeCheck();
             return true;
-        } else if($this->routeCheck($url, 'user/check-cert', 'POST')) {
-            $UserController->checkCert();
-            return true;
-        } else if($this->routeCheck($url, 'user/send-cert/sessionout', 'GET')) {
+        } else if($this->routeCheck($url, 'user/code/sessionout', 'GET')) {
             $UserController->sessionout();
             return true;
         } else {
