@@ -5,6 +5,7 @@ use Controller\AccessController;
 use Route\AuthRoute;
 use Route\UserRoute;
 use Route\PostRoute;
+use Route\CommentRoute;
 use Route\TestRoute;
 
 
@@ -20,7 +21,8 @@ $routes = [
     new AuthRoute(),
     new UserRoute(),
     new PostRoute(),
-    new TestRoute(),
+    new CommentRoute(),
+    new TestRoute()
 ];
 
 $routeMatched = false;

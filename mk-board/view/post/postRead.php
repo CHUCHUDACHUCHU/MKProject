@@ -1,6 +1,7 @@
 <!doctype html>
 <?php
 use Model\Post;
+use Model\Comment;
 include __DIR__ . '/../part/head.php';
 ?>
 <body>
@@ -17,6 +18,7 @@ include __DIR__ . '/../part/nav.php';
         <?php
         $postIdx = $_GET['postIdx'];
         $post = new Post();
+        $comment = new Comment();
 
         $postInfo = $post->getPost($postIdx);
 
@@ -67,7 +69,100 @@ include __DIR__ . '/../part/nav.php';
                     </form>
                     <a href="/mk-board/post/list" class="btn btn-primary mr-2">목록</a>
                 </div>
+
+                <hr/>
+                <h3>댓글</h3>
                 <?php
+                $comments = $comment->getAllComments($postInfo['postIdx']);
+                if ($comments) {
+                    foreach ($comments as $commentInfo) {
+                        ?>
+                        <!-- 댓글 섹션 -->
+                        <div class="mt-4 card" style="background-color: cornsilk">
+                            <div class="card-body commentBox">
+                                <input type="hidden" class="commentIdx" value="<?= $commentInfo['commentIdx'] ?>"/>
+                                <div class="media-body mb-3">
+                                    <div class="row" style="padding-left: 10px;">
+                                        <h6 class="mt-0 userName"><?= $commentInfo['userName'] ?></h6>
+                                        <h6 class="mt-0 userEmail">@ <?= $commentInfo['userEmail'] ?></h6>
+                                    </div>
+                                    <div class="mt-2 content" style="background-color: orange; padding: 10px; border-radius: 10px; display: inline-block;">
+                                        <?= nl2br($commentInfo['content']) ?>
+                                    </div>
+                                </div>
+                                <?php
+                                if($_SESSION['userIdx'] === $commentInfo['userIdx']) {
+                                    ?>
+                                    <div class="editCommentBtnGroup">
+                                        <button class="btn btn-primary btn-sm openCommentEditModal">수정</button>
+                                        <button class="btn btn-danger btn-sm deleteCommentBtn">삭제</button>
+                                    </div>
+                                <?php
+                                }
+                                ?>
+
+                                <div class="row mt-1" style="padding-left: 15px;">
+                                    <p class="mb-0" style="font-size: 13px">작성: <?= $commentInfo['created_at'] ?> &nbsp;</p>
+                                    <p class="mb-0" style="font-size: 13px">수정: <?= $commentInfo['updated_at'] ?></p>
+                                </div>
+                            </div>
+                        </div>
+                <?php
+                    }
+                }
+                ?>
+                <div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form class="editCommentModalForm">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editModalLabel">댓글 수정</h5>
+                                    <button style="height: 35px;" type="button"
+                                            class="btn-close btn btn-primary p-1"
+                                            data-bs-dismiss="modal" aria-label="Close">
+                                        <span style="width: 23px; height: 23px"
+                                              class="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+                                <input type="hidden" class="commentIdx" id="commentIdx" value="">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Name:</label>
+                                        <input class="form-control" type="txt" id="userName" value="" readonly>
+                                    </div><div class="mb-3">
+                                        <label class="form-label">Email:</label>
+                                        <input class="form-control" type="txt" id="userEmail" value="" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editModalContent" class="form-label">내용:</label>
+                                        <textarea class="form-control content" id="content"
+                                                  rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" id="editCommentModalSubmit" class="btn btn-primary editCommentModalSubmit">수정</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <hr/>
+                    <h5>댓글 작성</h5>
+                    <form action="/mk-board/comment/create" method="post">
+                        <div class="form-group">
+                            <input type="hidden" name="postIdx" id="postIdx" value="<?= $postInfo['postIdx'] ?>">
+                            <input type="hidden" name="userIdx" id="userIdx" value="<?= $_SESSION['userIdx'] ?>">
+                            <label for="content">내용:</label>
+                            <textarea name="content" class="form-control" id="content" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">댓글 작성</button>
+                    </form>
+                </div>
+        <?php
             }
         } else {
             echo "<script>alert('존재하지 않는 게시물입니다.');history.back();</script>";

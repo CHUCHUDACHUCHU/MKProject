@@ -355,8 +355,108 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    const openCommentEditModal = document.querySelectorAll('.openCommentEditModal');
+    openCommentEditModal.forEach(function (item) {
+        item.addEventListener('click', function () {
+            const commentIdx = this.closest('.commentBox').querySelector('.commentIdx').value;
+            const userEmail = this.closest('.commentBox').querySelector('.userEmail').innerText.slice(2);
+            const userName = this.closest('.commentBox').querySelector('.userName').innerText;
+            const content = this.closest('.commentBox').querySelector('.content').innerText;
+
+            console.log(commentIdx, userEmail, userName, content);
+
+            const editCommentModal = $('#editCommentModal');
+            editCommentModal.find('#commentIdx').val(commentIdx);
+            editCommentModal.find('#userName').val(userName);
+            editCommentModal.find('#userEmail').val(userEmail);
+            editCommentModal.find('#content').text(content);
+            editCommentModal.modal('show');
+        })
+    })
+
+
 
     /**
+     * 댓글 수정 요청 이벤트 등록
+     * */
+    const editCommentModalSubmit = document.querySelector('.editCommentModalSubmit');
+    editCommentModalSubmit.addEventListener('click', function () {
+            const commentIdx = this.closest('.editCommentModalForm').querySelector('.commentIdx').value;
+            const content = this.closest('.editCommentModalForm').querySelector('.content').value;
+            console.log(commentIdx, content);
+
+            fetch(`/mk-board/comment/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    commentIdx: commentIdx,
+                    content, content
+                }),
+            })
+                .then((res) => {
+                    if (res.status !== 200) {
+                        throw new Error('Network response was not 200');
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    if (data.result.status === 'success') {
+                        alert(data.result.message);
+                        location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
+                    } else {
+                        alert(data.result.message);
+                    }
+                })
+                .catch((err) => {
+                    alert('댓글 수정 요청 : fetch 에러 ' + err);
+                });
+    });
+
+
+
+    /**
+     * 댓글 삭제 기능
+     * */
+    const deleteCommentBtn = document.querySelectorAll('.deleteCommentBtn');
+    deleteCommentBtn.forEach(function (item) {
+        item.addEventListener('click', function () {
+            const commentIdx = this.closest('.commentBox').querySelector('.commentIdx').value;
+            console.log(commentIdx);
+
+            if(confirm('정말 삭제하시겠습니까?')) {
+                fetch(`/mk-board/comment/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        commentIdx: commentIdx,
+                    }),
+                })
+                    .then((res) => {
+                        if (res.status !== 200) {
+                            throw new Error('Network response was not 200');
+                        }
+                        return res.json();
+                    })
+                    .then((data) => {
+                        if (data.result.status === 'success') {
+                            alert(data.result.message);
+                            location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
+                        } else {
+                            alert(data.result.message);
+                        }
+                    })
+                    .catch((err) => {
+                        alert('댓글 삭제 요청 : fetch 에러 ' + err);
+                    });
+            }
+        })
+    });
+
+     /**
      * 비밀번호 실시간 유효 검사
      * */
     const changePassword = document.getElementById("changePassword");
