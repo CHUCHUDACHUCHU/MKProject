@@ -280,57 +280,20 @@ document.addEventListener('DOMContentLoaded', function () {
      * 회원 권한 변경 요청 이벤트 등록
      * */
     const dropdownItems = document.querySelectorAll('.dropdown-item');
-    dropdownItems.forEach(function (item) {
-        item.addEventListener('click', function () {
-            const selectedValue = this.getAttribute('data-value');
-            const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
+    if(dropdownItems) {
+        dropdownItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const selectedValue = this.getAttribute('data-value');
+                const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
 
-            fetch(`/mk-board/user/update/status`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userEmail: userEmail,
-                    userStatus: selectedValue
-                }),
-            })
-                .then((res) => {
-                    if (res.status !== 200) {
-                        throw new Error('Network response was not 200');
-                    }
-                    return res.json();
-                })
-                .then((data) => {
-                    if(data.result.status === 'success') {
-                        alert(data.result.message);
-                        location.href='/mk-board/user/manage';
-                    } else {
-                        alert(data.result.message);
-                    }
-                })
-                .catch((err) => {
-                    alert('비밀번호 초기화 요청 : fetch 에러 ' + err);
-                });
-        });
-    });
-
-    /**
-     * 회원 삭제 요청 이벤트 등록
-     * */
-    const deleteButtons = document.querySelectorAll('.userDeleteBtn');
-    deleteButtons.forEach(function (item) {
-        item.addEventListener('click', function () {
-            const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
-            console.log(userEmail);
-            if(confirm('정말 삭제하시겠습니까?')) {
-                fetch(`/mk-board/user/delete`, {
+                fetch(`/mk-board/user/update/status`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         userEmail: userEmail,
+                        userStatus: selectedValue
                     }),
                 })
                     .then((res) => {
@@ -348,31 +311,74 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     })
                     .catch((err) => {
-                        alert('회원 삭제 요청 : fetch 에러 ' + err);
+                        alert('비밀번호 초기화 요청 : fetch 에러 ' + err);
                     });
-
-            }
+            });
         });
-    });
+    }
+
+    /**
+     * 회원 삭제 요청 이벤트 등록
+     * */
+    const deleteButtons = document.querySelectorAll('.userDeleteBtn');
+    if(deleteButtons) {
+        deleteButtons.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
+                console.log(userEmail);
+                if(confirm('정말 삭제하시겠습니까?')) {
+                    fetch(`/mk-board/user/delete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            userEmail: userEmail,
+                        }),
+                    })
+                        .then((res) => {
+                            if (res.status !== 200) {
+                                throw new Error('Network response was not 200');
+                            }
+                            return res.json();
+                        })
+                        .then((data) => {
+                            if(data.result.status === 'success') {
+                                alert(data.result.message);
+                                location.href='/mk-board/user/manage';
+                            } else {
+                                alert(data.result.message);
+                            }
+                        })
+                        .catch((err) => {
+                            alert('회원 삭제 요청 : fetch 에러 ' + err);
+                        });
+
+                }
+            });
+        });
+    }
 
     const openCommentEditModal = document.querySelectorAll('.openCommentEditModal');
-    openCommentEditModal.forEach(function (item) {
-        item.addEventListener('click', function () {
-            const commentIdx = this.closest('.commentBox').querySelector('.commentIdx').value;
-            const userEmail = this.closest('.commentBox').querySelector('.userEmail').innerText.slice(2);
-            const userName = this.closest('.commentBox').querySelector('.userName').innerText;
-            const content = this.closest('.commentBox').querySelector('.content').innerText;
+    if(openCommentEditModal) {
+        openCommentEditModal.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const commentIdx = this.closest('.commentBox').querySelector('.commentIdx').value;
+                const userEmail = this.closest('.commentBox').querySelector('.userEmail').innerText.slice(2);
+                const userName = this.closest('.commentBox').querySelector('.userName').innerText;
+                const content = this.closest('.commentBox').querySelector('.content').innerText;
 
-            console.log(commentIdx, userEmail, userName, content);
+                console.log(commentIdx, userEmail, userName, content);
 
-            const editCommentModal = $('#editCommentModal');
-            editCommentModal.find('#commentIdx').val(commentIdx);
-            editCommentModal.find('#userName').val(userName);
-            editCommentModal.find('#userEmail').val(userEmail);
-            editCommentModal.find('#content').text(content);
-            editCommentModal.modal('show');
+                const editCommentModal = $('#editCommentModal');
+                editCommentModal.find('#commentIdx').val(commentIdx);
+                editCommentModal.find('#userName').val(userName);
+                editCommentModal.find('#userEmail').val(userEmail);
+                editCommentModal.find('#content').text(content);
+                editCommentModal.modal('show');
+            })
         })
-    })
+    }
 
 
 
@@ -380,7 +386,8 @@ document.addEventListener('DOMContentLoaded', function () {
      * 댓글 수정 요청 이벤트 등록
      * */
     const editCommentModalSubmit = document.querySelector('.editCommentModalSubmit');
-    editCommentModalSubmit.addEventListener('click', function () {
+    if(editCommentModalSubmit) {
+        editCommentModalSubmit.addEventListener('click', function () {
             const commentIdx = this.closest('.editCommentModalForm').querySelector('.commentIdx').value;
             const content = this.closest('.editCommentModalForm').querySelector('.content').value;
             console.log(commentIdx, content);
@@ -412,7 +419,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch((err) => {
                     alert('댓글 수정 요청 : fetch 에러 ' + err);
                 });
-    });
+        });
+    }
 
 
 
@@ -420,41 +428,43 @@ document.addEventListener('DOMContentLoaded', function () {
      * 댓글 삭제 기능
      * */
     const deleteCommentBtn = document.querySelectorAll('.deleteCommentBtn');
-    deleteCommentBtn.forEach(function (item) {
-        item.addEventListener('click', function () {
-            const commentIdx = this.closest('.commentBox').querySelector('.commentIdx').value;
-            console.log(commentIdx);
+    if(deleteCommentBtn) {
+        deleteCommentBtn.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const commentIdx = this.closest('.commentBox').querySelector('.commentIdx').value;
+                console.log(commentIdx);
 
-            if(confirm('정말 삭제하시겠습니까?')) {
-                fetch(`/mk-board/comment/delete`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        commentIdx: commentIdx,
-                    }),
-                })
-                    .then((res) => {
-                        if (res.status !== 200) {
-                            throw new Error('Network response was not 200');
-                        }
-                        return res.json();
+                if(confirm('정말 삭제하시겠습니까?')) {
+                    fetch(`/mk-board/comment/delete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            commentIdx: commentIdx,
+                        }),
                     })
-                    .then((data) => {
-                        if (data.result.status === 'success') {
-                            alert(data.result.message);
-                            location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
-                        } else {
-                            alert(data.result.message);
-                        }
-                    })
-                    .catch((err) => {
-                        alert('댓글 삭제 요청 : fetch 에러 ' + err);
-                    });
-            }
-        })
-    });
+                        .then((res) => {
+                            if (res.status !== 200) {
+                                throw new Error('Network response was not 200');
+                            }
+                            return res.json();
+                        })
+                        .then((data) => {
+                            if (data.result.status === 'success') {
+                                alert(data.result.message);
+                                location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
+                            } else {
+                                alert(data.result.message);
+                            }
+                        })
+                        .catch((err) => {
+                            alert('댓글 삭제 요청 : fetch 에러 ' + err);
+                        });
+                }
+            })
+        });
+    }
 
      /**
      * 비밀번호 실시간 유효 검사
@@ -504,14 +514,16 @@ document.addEventListener('DOMContentLoaded', function () {
      * 페이지네이션 페이지 이동
      * */
     const pageLinks = document.querySelectorAll('.page-link');
-    pageLinks.forEach(function (pageLink) {
-        pageLink.addEventListener('click', function () {
-            var currentUrl = window.location.href;
-            var urlSearchParams = new URLSearchParams(window.location.search);
+    if(pageLinks) {
+        pageLinks.forEach(function (pageLink) {
+            pageLink.addEventListener('click', function () {
+                var currentUrl = window.location.href;
+                var urlSearchParams = new URLSearchParams(window.location.search);
 
-            // page 파라미터 세팅
-            urlSearchParams.set('page', pageLink.getAttribute('data-page'));
-            location.href = currentUrl.split('?')[0] + '?' + urlSearchParams.toString();
+                // page 파라미터 세팅
+                urlSearchParams.set('page', pageLink.getAttribute('data-page'));
+                location.href = currentUrl.split('?')[0] + '?' + urlSearchParams.toString();
+            });
         });
-    });
+    }
 });
