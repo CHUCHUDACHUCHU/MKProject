@@ -14,8 +14,14 @@ class UserRoute extends BaseRoute {
             return $this->requireView('user', 'userMypage');
         } else if($this->routeCheck($url, "user/read", "GET")) {
             return $this->requireView('user', 'userRead');
+        } else if($this->routeCheck($url, "user/code/status", "POST")) {
+            $UserController->userCodeStatus();
+            return true;
         } else if($this->routeCheck($url, "user/create", "POST")) {
             $UserController->create();
+            return true;
+        } else if($this->routeCheck($url, "user/delete", "POST")) {
+            $UserController->delete();
             return true;
         } else if($this->routeCheck($url, "user/update/all", "POST")) {
             $UserController->updateAll();
@@ -25,6 +31,9 @@ class UserRoute extends BaseRoute {
             return true;
         } else if($this->routeCheck($url, "user/update/password", "POST")) {
             $UserController->updatePassword();
+            return true;
+        } else if($this->routeCheck($url, "user/update/status", "POST")) {
+            $UserController->updateStatus();
             return true;
         } else if($this->routeCheck($url, "user/reset/password", "POST")) {
             $UserController->resetPassword();

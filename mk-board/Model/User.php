@@ -128,6 +128,27 @@ class User extends BaseModel {
 
     /**
      * 회원 데이터 수정하기
+     * 회원 권한 수정
+     * @param $userStatus
+     * @param $userEmail
+     * @return array|mixed
+     */
+    public function updateStatus($userStatus, $userEmail)
+    {
+        try {
+            $query = "update users set userStatus =:userStatus where userEmail =:userEmail ";
+            return $this->conn->prepare($query)->execute([
+                'userStatus' => $userStatus,
+                'userEmail' => $userEmail
+            ]);
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 회원 데이터 수정하기
      * 회원 비밀번호 수정
      * @param $userIdx
      * @param $changePassword
@@ -210,6 +231,23 @@ class User extends BaseModel {
             ]);
             return $stmt->fetch();
         } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * User 삭제 (논리적!)
+     * @param string $userEmail
+     * @return bool
+     */
+    public function delete(string $userEmail): bool {
+        try {
+            $query = "update users set deleted_at = NOW() where userEmail =:userEmail";
+            return $this->conn->prepare($query)->execute([
+                'userEmail' => $userEmail
+            ]);
+        } catch (PDOException $e) {
             error_log($e->getMessage());
             return false;
         }

@@ -7,7 +7,6 @@ use Route\UserRoute;
 use Route\PostRoute;
 use Route\TestRoute;
 
-$access = new AccessController();
 
 // Start session
 session_start();
@@ -15,6 +14,7 @@ session_start();
 // Get URL
 $url = isset($_GET['url']) ? $_GET['url'] : '/';
 
+$access = new AccessController();
 $access->accessFilter($url);
 $routes = [
     new AuthRoute(),

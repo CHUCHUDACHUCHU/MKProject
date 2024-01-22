@@ -49,15 +49,20 @@ include __DIR__ . '/../part/nav.php';
             $endPage = $totalPage > $currentPage + 4 ? $currentPage + 4 : $totalPage;
             $endPage = $endPage < 10 && $totalPage > 10 ? 10 : $endPage;
 
-            // 게시글 전체목록 가져오기
+            // 사용자 전체목록 가져오기
             $users = $user->getAllUsers($searchWord, $startIndex, $perPage);
 
             if($users) {
                 foreach ($users as $userInfo) {
-
+                    $userStatusColor = '#ff9800';
+                    if ($userInfo['userStatus'] === '관리자') {
+                        $userStatusColor = 'mediumseagreen';
+                    } else if ($userInfo['userStatus'] === '정지') {
+                        $userStatusColor = 'lightcoral';
+                    }
                     ?>
                     <!-- 회원 정보 -->
-                    <div class="card mb-3">
+                    <div class="card mb-3 userInfoDashboard">
                         <div class="row g-0 align-items-center">
                             <div class="col-md-1">
                                 <img src="/mk-board/assets/img/logo.png" width="40px" height="40px">
@@ -65,23 +70,20 @@ include __DIR__ . '/../part/nav.php';
                             <div class="col-md-7">
                                 <div class="row">
                                     <a href="/mk-board/user/read?userIdx=<?= $userInfo['userIdx'] ?>" class="card-title" style="font-weight: bolder; cursor: pointer"><?= $userInfo['userName'] ?></a>
-                                    <p class="card-text" style="font-weight: bold">&nbsp @ <?= $userInfo['userEmail'] ?></p>
+                                    <p class="card-text userEmail" style="font-weight: bold">&nbsp @ <?= $userInfo['userEmail'] ?></p>
                                 </div>
                             </div>
                             <div class="col-md-3 row justify-content-end">
-                                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-primary dropdown-toggle" style="width: 90px" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <?= $userInfo['userStatus'] ?>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">관리자</a></li>
-                                            <li><a class="dropdown-item" href="#">일반</a></li>
-                                            <li><a class="dropdown-item" href="#">대기</a></li>
-                                            <li><a class="dropdown-item" href="#">정지</a></li>
-                                        </ul>
-                                    </div>
-                                    <button type="button" class="btn btn-danger">삭제</button>
+                                <div aria-label="Button group with nested dropdown">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" style="background-color: <?=$userStatusColor?> !important; width: 90px" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <?= $userInfo['userStatus'] ?>
+                                    </button>
+                                    <ul class="dropdown-menu" style="cursor: pointer">
+                                        <li><a class="dropdown-item" data-value="관리자">관리자</a></li>
+                                        <li><a class="dropdown-item" data-value="일반">일반</a></li>
+                                        <li><a class="dropdown-item" data-value="정지">정지</a></li>
+                                    </ul>
+                                    <button type="button" class="btn btn-danger userDeleteBtn">삭제</button>
                                 </div>
                             </div>
                         </div>
@@ -105,7 +107,7 @@ include __DIR__ . '/../part/nav.php';
                         <?php
                         for ($page = max($currentPage - 4, 1); $page <= $endPage; $page++) {
                             $isActive = $page == $currentPage ? 'active' : '';
-                            echo "<li class='page-item $isActive'><span class='page-link' data-page='$page'>$page</span></li>";
+                            echo "<li class='page-item $isActive' style='cursor: pointer'><span class='page-link' data-page='$page'>$page</span></li>";
                         }
                         ?>
                         <li class="page-item">

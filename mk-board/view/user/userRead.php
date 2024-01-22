@@ -149,7 +149,7 @@ include __DIR__ . '/../part/nav.php';
                             <?php
                             for ($page = max($currentPage - 4, 1); $page <= $endPage; $page++) {
                                 $isActive = $page == $currentPage ? 'active' : '';
-                                echo "<li class='page-item $isActive'><span class='page-link' data-page='$page'>$page</span></li>";
+                                echo "<li class='page-item $isActive' style='cursor: pointer'><span class='page-link' data-page='$page'>$page</span></li>";
                             }
                             ?>
                             <li class="page-item">

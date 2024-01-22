@@ -33,6 +33,7 @@ class AccessController extends BaseController{
 
         $loginPossibleUrl = [
             'auth/login',
+            'user/code/status',
             'user/code/send',
             'user/code/check',
             'user/code/sessionout',
@@ -48,12 +49,20 @@ class AccessController extends BaseController{
             'user/my-page',
             'auth/logout',
             'auth/sessionout',
+            'user/code/status',
             'user/code/send',
             'user/code/check',
             'user/code/sessionout',
             'user/update/email',
             'user/update/password',
             'test/session'
+        ];
+
+        // 5. 회원의 상태가 정지일 때 : $_SESSION['userStatus'] === '정지'
+
+        $stopUserPossibleUrl = [
+            'user/stop',
+            'auth/logout'
         ];
 
         if (empty($url) || $url == '/') {
@@ -66,6 +75,12 @@ class AccessController extends BaseController{
                 return;
             }
         } else {
+            if($_SESSION['userStatus'] === '정지') {
+                if(!in_array($url, $stopUserPossibleUrl)) {
+                    $this->redirect('/mk-board/auth/logout', '정지상태입니다.\n관리자에게 문의하세요.\nEmail : chu.gyoyoon@mkinternet.com');
+                    return;
+                }
+            }
             if($_SESSION['userInit'] === 0) {
                 if(!in_array($url, $firstUserPossibleUrl)) {
                     $this->redirect('/mk-board/user/my-page', '비밀번호 변경을 우선 해주세요.');

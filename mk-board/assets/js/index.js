@@ -50,7 +50,101 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById("homeNav").classList.add("active");
     } else if (currentPath === "/mk-board/user/my-page") { // Adjust the path for MyPage
         document.getElementById("myPageNav").classList.add("active");
+    } else if (currentPath === '/mk-board/user/manage') {
+        document.getElementById("manageUserNav").classList.add("active");
+    } else if (currentPath === '/mk-board/post/manage') {
+        document.getElementById("managerPostNav").classList.add("active");
     }
+
+
+    /**
+     * 인증번호 이메일 발송 이벤트처리
+     * */
+    const verificationCodeSendBtn = document.querySelector('.verificationCodeSendBtn');
+    if(verificationCodeSendBtn) {
+        verificationCodeSendBtn.addEventListener('click', function () {
+            const expEmailText = /^[A-Za-z0-9\.\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z0-9\.\-]+$/;
+            const email = document.getElementById('email');
+            if (codeCheck === 1) {
+                alert('인증이 완료되었습니다.');
+                return false;
+            }
+
+            if (email.value == '') {
+                alert("이메일을 입력해주세요.");
+                email.focus();
+                return false;
+            }
+            if (!expEmailText.test(email.value)) {
+                alert('이메일 형식이 올바르지 않습니다.');
+                email.focus();
+                return false;
+            }
+
+            fetch(`/mk-board/user/code/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userEmail: email.value,
+                })
+            })
+                .then((res) => {
+                    if (res.status !== 200) {
+                        throw new Error('Network response was not 200');
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    if (data.result.status === 'success') {
+                        //인증번호 세션타임
+                        let authCertSessionTime = 180;
+                        const intervalCodeSessionTime = startInterval(1, function () {
+                            const codeSessionLiveTime = document.getElementById('codeSessionLiveTime');
+                            if (codeSessionLiveTime) {
+                                codeSessionLiveTime.textContent = secToTime(authCertSessionTime);
+                                authCertSessionTime--;
+
+                                if (authCertSessionTime < 0 || codeCheck == 1) {
+                                    clearInterval(intervalCodeSessionTime);
+                                    fetch(`/mk-board/user/code/sessionout`)
+                                        .catch((err) => {
+                                            alert('인증번호 세션 만료 요청 : fetch 에러' + err);
+                                        });
+                                }
+                            }
+                        })
+                        fetch(`/mk-board/user/code/send`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: email.value,
+                            }),
+                        })
+                            .then((res) => {
+                                if (res.status !== 200) {
+                                    throw new Error('Network response was not 200');
+                                }
+                                return res.json();
+                            })
+                            .then((data) => {
+                                if (data.result.status !== 'success') {
+                                    alert(data.result.message);
+                                }
+                            })
+                    } else {
+                        alert(data.result.message);
+                    }
+                })
+                .catch((err) => {
+                    alert(err);
+                })
+        });
+    }
+
 
     /**
      * 인증번호 확인 이벤트처리
@@ -77,96 +171,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     return res.json();
                 })
                 .then((data) => {
-                const txt = data.result;
-                console.log(txt);
-                if (txt === "success") {
-                    codeCheck = 1;
-                    result.style.display = "block";
-                    result.style.color = "green";
-                    result.innerHTML = "&nbsp;&nbsp;&nbsp;인증이 완료되었습니다.";
-                } else if(txt === 'wrong') {
-                    result.style.display = "block";
-                    result.style.color = "red";
-                    result.innerHTML = "&nbsp;&nbsp;&nbsp;인증번호를 다시 확인해주세요.";
-                    codeInputBox.focus();
-                    codeInputBox.addEventListener("keydown", function () {
-                        result.style.display = "none";
-                    });
-                }})
+                    if (data.result.status === "success") {
+                        codeCheck = 1;
+                        result.style.display = "block";
+                        result.style.color = "green";
+                        result.innerHTML = `&nbsp;&nbsp;&nbsp;${data.result.message}`;
+                    } else if(data.result.status === 'fail') {
+                        result.style.display = "block";
+                        result.style.color = "red";
+                        result.innerHTML = `&nbsp;&nbsp;&nbsp;${data.result.message}`;
+                        codeInputBox.focus();
+                        codeInputBox.addEventListener("keydown", function () {
+                            result.style.display = "none";
+                        });
+                    } else {
+                        alert(data.result.message)
+                    }})
                 .catch((err) => {
                     alert('인증번호 확인 요청 : fetch 에러 ' + err);
                 })
         })
     }
 
-
-    /**
-     * 인증번호 이메일 발송 이벤트처리
-     * */
-    const verificationCodeSendBtn = document.querySelector('.verificationCodeSendBtn');
-    if(verificationCodeSendBtn) {
-        verificationCodeSendBtn.addEventListener('click', function () {
-            const expEmailText = /^[A-Za-z0-9\.\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z0-9\.\-]+$/;
-            const email = document.getElementById('email');
-            if(codeCheck === 1) {
-                alert('인증이 완료되었습니다.');
-                return false;
-            }
-
-            if (email.value == '') {
-                alert("이메일을 입력해주세요.");
-                email.focus();
-                return false;
-            }
-            if (!expEmailText.test(email.value)) {
-                alert('이메일 형식이 올바르지 않습니다.');
-                email.focus();
-                return false;
-            }
-
-            fetch(`/mk-board/user/code/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email.value,
-                }),
-            })
-                .then((res) => {
-                    if (res.status !== 200) {
-                        throw new Error('Network response was not 200');
-                    }
-                    return res.json();
-                })
-                .then((data) => {
-                    if(data.result.status === "success") {
-                        //인증번호 세션타임
-                        let authCertSessionTime = 10;
-                        const intervalCodeSessionTime = startInterval(1, function () {
-                            const codeSessionLiveTime = document.getElementById('codeSessionLiveTime');
-                            if (codeSessionLiveTime) {
-                                codeSessionLiveTime.textContent = secToTime(authCertSessionTime);
-                                authCertSessionTime--;
-
-                                if(authCertSessionTime < 0 || codeCheck == 1) {
-                                    clearInterval(intervalCodeSessionTime);
-                                    fetch(`/mk-board/user/code/sessionout`)
-                                        .catch((err) => {
-                                            alert('인증번호 세션 만료 요청 : fetch 에러' + err);
-                                        });
-                                }
-                            }
-                        })
-                    } else {
-                        alert(data.result.message);
-                    }
-                })
-                .catch((err) => {
-                    alert('인증번호 보내기 요청 : fetch 에러 ' + err);
-                });
-        })
-    }
 
     /**
      * 이메일 수정 버튼 이벤트 처리
@@ -195,13 +221,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         return res.json();
                     })
                     .then((data) => {
-                        if(data.result === 'success') {
-                            alert('이메일 변경에 성공하였습니다.');
-                            location.href = '/mk-board/user/my-page';
-                        } else if(data.result === 'fail') {
-                            alert('이메일 변경에 실패하였습니다.');
+                        if(data.result.status === 'success') {
+                            alert(data.result.message);
+                            location.href='/mk-board/user/my-page';
                         } else {
-                            alert('입력값에 오류가 생겼습니다.')
+                            alert(data.result.message);
                         }
                     })
                     .catch((err) => {
@@ -222,7 +246,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('인증번호를 확인해주세요.');
             } else {
                 const email = document.getElementById('email');
-
                 fetch(`/mk-board/user/reset/password`, {
                     method: 'POST',
                     headers: {
@@ -233,19 +256,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     }),
                 })
                     .then((res) => {
-                        if (res.status !== 200) {
-                            throw new Error('Network response was not 200');
-                        }
-                        return res.json();
-                    })
+                    if (res.status !== 200) {
+                        throw new Error('Network response was not 200');
+                    }
+                    return res.json();
+                })
                     .then((data) => {
-                        if(data.result === 'success') {
-                            alert('비밀번호가 초기화 되었습니다. 이메일을 확인해주세요.');
-                            location.href = '/mk-board/auth/login';
-                        } else if(data.result === 'fail') {
-                            alert('초기화 실패!');
+                        if(data.result.status === 'success') {
+                            alert(data.result.message);
+                            location.href='/mk-board';
                         } else {
-                            alert('입력값에 오류가 생겼습니다.')
+                            alert(data.result.message);
                         }
                     })
                     .catch((err) => {
@@ -254,6 +275,86 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
     }
+
+    /**
+     * 회원 권한 변경 요청 이벤트 등록
+     * */
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    dropdownItems.forEach(function (item) {
+        item.addEventListener('click', function () {
+            const selectedValue = this.getAttribute('data-value');
+            const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
+
+            fetch(`/mk-board/user/update/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userEmail: userEmail,
+                    userStatus: selectedValue
+                }),
+            })
+                .then((res) => {
+                    if (res.status !== 200) {
+                        throw new Error('Network response was not 200');
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    if(data.result.status === 'success') {
+                        alert(data.result.message);
+                        location.href='/mk-board/user/manage';
+                    } else {
+                        alert(data.result.message);
+                    }
+                })
+                .catch((err) => {
+                    alert('비밀번호 초기화 요청 : fetch 에러 ' + err);
+                });
+        });
+    });
+
+    /**
+     * 회원 삭제 요청 이벤트 등록
+     * */
+    const deleteButtons = document.querySelectorAll('.userDeleteBtn');
+    deleteButtons.forEach(function (item) {
+        item.addEventListener('click', function () {
+            const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
+            console.log(userEmail);
+            if(confirm('정말 삭제하시겠습니까?')) {
+                fetch(`/mk-board/user/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userEmail: userEmail,
+                    }),
+                })
+                    .then((res) => {
+                        if (res.status !== 200) {
+                            throw new Error('Network response was not 200');
+                        }
+                        return res.json();
+                    })
+                    .then((data) => {
+                        if(data.result.status === 'success') {
+                            alert(data.result.message);
+                            location.href='/mk-board/user/manage';
+                        } else {
+                            alert(data.result.message);
+                        }
+                    })
+                    .catch((err) => {
+                        alert('회원 삭제 요청 : fetch 에러 ' + err);
+                    });
+
+            }
+        });
+    });
+
 
     /**
      * 비밀번호 실시간 유효 검사
