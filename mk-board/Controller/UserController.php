@@ -1,12 +1,21 @@
 <?php
 namespace Controller;
 use Model\User;
+use Model\Post;
+use Model\Comment;
+use Model\File;
 
 class UserController extends BaseController {
     private $user;
+    private $post;
+    private $comment;
+    private $file;
 
     public function __construct() {
-        $this->user = new user();
+        $this->user = new User();
+        $this->post = new Post();
+        $this->comment = new Comment();
+        $this->file = new File();
     }
 
     public function userCodeStatus() {
@@ -50,7 +59,7 @@ class UserController extends BaseController {
 
         $userName = $_POST['userName'];
         $userEmail = $_POST['userEmail'];
-        $userDepart = $_POST['userDepart'];
+        $departmentIdx = $_POST['departmentIdx'];
         $userPhone = $_POST['userPhone'];
         $userStatus = $_POST['userStatus'];
 
@@ -60,8 +69,8 @@ class UserController extends BaseController {
         if($this->user->getUserByEmail($userEmail)) {
             $this->redirectBack('가입된 이메일이 존재합니다.');
         }else {
-            if($this->parametersCheck($userName, $userEmail, $userPw, $userDepart, $userPhone, $userStatus)) {
-                if($this->user->create($userName, $userEmail, $userPw, $userDepart, $userPhone, $userStatus)) {
+            if($this->parametersCheck($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus)) {
+                if($this->user->create($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus)) {
                     $mailSubject = "MKBoard 사용자 생성이 완료되었습니다. $userName 님";
                     $mailBody = "
                                 <b>사용자 이메일: $userEmail</b><br/>
@@ -89,16 +98,16 @@ class UserController extends BaseController {
 
     public function updateAll() {
         $userName = $_POST['userName'];
-        $userDepart = $_POST['userDepart'];
+        $departmentIdx = $_POST['departmentIdx'];
         $userPhone = $_POST['userPhone'];
         $userIdx = $_SESSION['userIdx'];
 
-        if($this->parametersCheck($userName, $userDepart, $userPhone)) {
+        if($this->parametersCheck($userName, $departmentIdx, $userPhone)) {
             $userNamePattern = '/^[A-Za-z가-힣]{1,10}$/';
             $userPhonePattern = '/^010-\d{4}-\d{4}$/';
 
             if(preg_match($userNamePattern, $userName) && preg_match($userPhonePattern, $userPhone)) {
-                if($this->user->updateAll($userName, $userDepart, $userPhone, $userIdx)) {
+                if($this->user->updateAll($userName, $departmentIdx, $userPhone, $userIdx)) {
                     $this->redirect('/mk-board/user/my-page', '사용자 정보가 수정되었습니다.');
                 } else {
                     $this->redirectBack('DB 변경에 실패하였습니다.');
@@ -125,28 +134,6 @@ class UserController extends BaseController {
             'message' => ''
         ];
 
-        if(!isset($_SESSION['userInit'])) {
-            if(!$this->user->getUserByEmail($userEmail)) {
-                $result['status'] = 'userNotFound';
-                $result['message'] = '해당 이메일로 가입된 사용자가 존재하지 않습니다.';
-                $this->echoJson(['result' => $result]);
-                return;
-            }
-        }
-        if(isset($_SESSION['userInit'])) {
-            if($this->user->getUserByEmail($userEmail)) {
-                $result['status'] = 'userAlreadyExist';
-                $result['message'] = '해당 이메일로 가입된 사용자가 이미 존재합니다.';
-                $this->echoJson(['result' => $result]);
-                return;
-            }
-        }
-        if (isset($_SESSION['verification_code']) && isset($_SESSION['verification_time']) && (time() - $_SESSION['verification_time']) <= 180) {
-            $result['status'] = 'codeExist';
-            $result['message'] = '인증번호가 이미 전송되었습니다. 3분 후 다시 시도해주세요.';
-            $this->echoJson(['result' => $result]);
-            return;
-        }
         // 새로운 인증번호 생성
         $verificationCode = rand(100000, 999999);
         // 이메일 발송
@@ -160,13 +147,13 @@ class UserController extends BaseController {
         $result['status'] = $this->sendEmail($userEmail, $mailSubject, $mailBody);
         if($result['status'] === 'success') {
             $result['message'] = '인증번호 전송에 성공하였습니다.';
+
+            // 세션에 새로운 인증번호와 현재 시간 저장
+            $_SESSION['verification_code'] = $verificationCode;
+            $_SESSION['verification_time'] = time();
         } else {
             $result['message'] = '인증번호 전송에 실패하였습니다 : PHPMailer 오류';
         }
-
-        // 세션에 새로운 인증번호와 현재 시간 저장
-        $_SESSION['verification_code'] = $verificationCode;
-        $_SESSION['verification_time'] = time();
 
         $this->echoJson(['result' => $result]);
     }
@@ -296,6 +283,8 @@ class UserController extends BaseController {
     public function delete() {
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userEmail = $requestData['userEmail'];
+        $userIdx = $this->user->getUserByEmail($userEmail)['userIdx'];
+        $posts = $this->post->getMyAllPosts($userIdx);
         $result = [
             'status' => '',
             'message' => ''
@@ -303,6 +292,12 @@ class UserController extends BaseController {
 
         if ($this->parametersCheck($userEmail)) {
             if ($this->user->delete($userEmail)) {
+                foreach ($posts as $item) {
+                    $this->comment->deleteCommentsByPost($item['postIdx']);
+                    $this->file->deleteFilesByPost($item['postIdx']);
+                }
+                $this->post->deletePostsByUser($userIdx);
+                // 각각의 게시글에 대한 댓글 삭제
                 $result['status'] = 'success';
                 $result['message'] = '회원 삭제에 성공하였습니다.';
             } else {

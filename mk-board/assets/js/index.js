@@ -8,9 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return setInterval(callback, seconds * 1000);
     };
 
-    //남은 시간 체킹
-    //remaingTime 1초마다 1씩 감소, 그리고 시분초형식으로 화면에 출력
-    //remaingTime 0초 될 경우, 세션 내 데이터 삭제(unset) => 성공 시, 세션 만료 출력 이후 index.php 보임.
     //로그인 인증 세션타임
     let loginRemainingTime = 1800;
     const intervalLoginSessionTime = startInterval(1, function () {
@@ -29,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //시분초 변환 함수
     function secToTime(duration) {
-        var seconds = Math.floor(duration % 60),
+        let seconds = Math.floor(duration % 60),
             minutes = Math.floor((duration / 60) % 60),
             hours = Math.floor((duration / (60 * 60)) % 24);
 
@@ -39,12 +36,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return minutes + ":" + seconds;
     }
+    
+    /**
+     * 로딩창 스피너 이벤트 등록!
+     * */
+
+    const userCreationForm = document.getElementById('userCreationForm');
+    const loadingSpinner = document.getElementById('loading-spinner');
+
+    if(userCreationForm) {
+        userCreationForm.addEventListener('submit', function () {
+            loadingSpinner.style.display = 'block';
+            return true;
+        })
+    }
 
 
     /**
      * 네비게이션바 클릭 액티브
      * */
-    var currentPath = window.location.pathname;
+    const currentPath = window.location.pathname;
 
     if (currentPath === "/mk-board/post/list") {
         document.getElementById("homeNav").classList.add("active");
@@ -242,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const resetPasswordBtn = document.querySelector('.resetPasswordBtn');
     if(resetPasswordBtn) {
         resetPasswordBtn.addEventListener('click', function () {
+            loadingSpinner.style.display = 'block';
             if(codeCheck === 0) {
                 alert('인증번호를 확인해주세요.');
             } else {
@@ -359,6 +371,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /**
+     * 댓글 수정 요청시 모달창 이벤트
+     * */
+
+    const deletePostBtn = document.querySelector('.deletePostBtn');
+    if(deletePostBtn) {
+        deletePostBtn.addEventListener('submit', function () {
+            confirm('정말 삭제하시겠습니까?');
+        })
+    }
+
+
+    /**
+     * 댓글 수정 요청시 모달창 이벤트
+     * */
     const openCommentEditModal = document.querySelectorAll('.openCommentEditModal');
     if(openCommentEditModal) {
         openCommentEditModal.forEach(function (item) {
@@ -383,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /**
-     * 댓글 수정 요청 이벤트 등록
+     * 댓글 수정 완료 요청 이벤트 등록
      * */
     const editCommentModalSubmit = document.querySelector('.editCommentModalSubmit');
     if(editCommentModalSubmit) {
@@ -410,7 +437,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .then((data) => {
                     if (data.result.status === 'success') {
-                        alert(data.result.message);
                         location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
                     } else {
                         alert(data.result.message);
@@ -452,7 +478,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         })
                         .then((data) => {
                             if (data.result.status === 'success') {
-                                alert(data.result.message);
                                 location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
                             } else {
                                 alert(data.result.message);
@@ -523,6 +548,74 @@ document.addEventListener('DOMContentLoaded', function () {
                 // page 파라미터 세팅
                 urlSearchParams.set('page', pageLink.getAttribute('data-page'));
                 location.href = currentUrl.split('?')[0] + '?' + urlSearchParams.toString();
+            });
+        });
+    }
+
+
+    /**
+     * 파일 다운로드 기능
+     * */
+
+    const handleDownload = (fileIdx, fileOriginName) => {
+        fetch(`/mk-board/file/download`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fileIdx: fileIdx,
+            }),
+        })
+            .then((res) => {
+                if (res.status !== 200) {
+                    throw new Error('Network response was not 200');
+                }
+                return res.json();
+            })
+            .then((data) => {
+                if (data.result.status === 'success') {
+                    const fileName = data.result.fileName;
+                    const targetFilePath = `http://localhost/mk-board/assets/uploads/${fileName}`;
+
+                    // 파일 다운로드를 위한 링크 생성
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = targetFilePath;
+                    downloadLink.download = fileOriginName;
+
+                    // 링크를 DOM에 추가하고 클릭하여 다운로드 시작
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+
+                    // 다운로드 후 링크를 DOM에서 제거
+                    document.body.removeChild(downloadLink);
+                } else {
+                    alert(data.result.message);
+                }
+            })
+            .catch((err) => {
+                alert('댓글 삭제 요청 : fetch 에러 ' + err);
+            });
+    };
+
+    const downloadBtn = document.querySelectorAll('.downloadBtn');
+    if (downloadBtn) {
+        downloadBtn.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const fileIdx = this.closest('.fileList').querySelector('.fileIdx').innerHTML;
+                const fileOriginName = this.closest('.fileList').querySelector('.downloadATag').innerHTML;
+                handleDownload(fileIdx, fileOriginName);
+            });
+        });
+    }
+
+    const downloadATag = document.querySelectorAll('.downloadATag');
+    if (downloadATag) {
+        downloadATag.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const fileIdx = this.closest('.fileList').querySelector('.fileIdx').innerHTML;
+                const fileOriginName = this.closest('.fileList').querySelector('.downloadATag').innerHTML;
+                handleDownload(fileIdx, fileOriginName);
             });
         });
     }

@@ -52,6 +52,10 @@ include __DIR__ . '/../part/head.php';
                                         </div>
                                         <span id = "codeCheckMessage" style="display: block; font-size: 10px"></span>
                                     </form>
+                                    <!-- 로딩 스피너 추가 -->
+                                    <div id="loading-spinner" style="display:none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                        <img src="/mk-board/assets/img/spinner.gif" alt="로딩 중..." /> <!-- 스피너 이미지 등을 넣어주세요 -->
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

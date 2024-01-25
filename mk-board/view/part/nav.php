@@ -1,6 +1,9 @@
 <?php
 use Model\User;
+use Model\Department;
 $user = new User();
+$department = new Department();
+$departments = $department->getAllDepartments();
 $nowUser = $user->getUserById($_SESSION['userIdx']);
 if($nowUser['userStatus'] == "관리자") {
     $navbarItems = '<a class="nav-link" href="/mk-board/post/list" id="homeNav">Home</a>

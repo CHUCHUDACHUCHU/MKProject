@@ -20,6 +20,7 @@
     "ext-pdo": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
-    "phpmailer/phpmailer": "~6.1"
+    "phpmailer/phpmailer": "~6.1",
+    "league/flysystem": "^2.0"
   }
 }

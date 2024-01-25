@@ -58,7 +58,7 @@ include __DIR__ . '/../part/nav.php';
                     if ($userInfo['userStatus'] === '관리자') {
                         $userStatusColor = 'mediumseagreen';
                     } else if ($userInfo['userStatus'] === '정지') {
-                        $userStatusColor = 'lightcoral';
+                        $userStatusColor = '#dc3545';
                     }
                     ?>
                     <!-- 회원 정보 -->
@@ -74,7 +74,7 @@ include __DIR__ . '/../part/nav.php';
                                 </div>
                             </div>
                             <div class="col-md-3 row justify-content-end">
-                                <div aria-label="Button group with nested dropdown">
+                                <div aria-label="Button group with nested dropdown" class="d-flex">
                                     <button type="button" class="btn btn-primary dropdown-toggle" style="background-color: <?=$userStatusColor?> !important; width: 90px" data-bs-toggle="dropdown" aria-expanded="false">
                                         <?= $userInfo['userStatus'] ?>
                                     </button>
@@ -83,8 +83,8 @@ include __DIR__ . '/../part/nav.php';
                                         <li><a class="dropdown-item" data-value="일반">일반</a></li>
                                         <li><a class="dropdown-item" data-value="정지">정지</a></li>
                                     </ul>
-                                    <button type="button" class="btn btn-danger userDeleteBtn">삭제</button>
                                 </div>
+                                <button type="button" class="btn btn-danger ml-auto userDeleteBtn">삭제</button>
                             </div>
                         </div>
                     </div>
@@ -127,7 +127,11 @@ include __DIR__ . '/../part/nav.php';
                     <h2 class="text-center">계정생성</h2>
                 </div>
                 <div class="card-body">
-                    <form action="/mk-board/user/create" method="post">
+                    <!-- 로딩 스피너 추가 -->
+                    <div id="loading-spinner" style="display:none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <img src="/mk-board/assets/img/spinner.gif" alt="로딩 중..." /> <!-- 스피너 이미지 등을 넣어주세요 -->
+                    </div>
+                    <form action="/mk-board/user/create" method="post" id="userCreationForm">
                         <div class="form-group">
                             <label>이름</label>
                             <input type="text" class="form-control" name="userName" placeholder="Enter Name">
@@ -141,14 +145,14 @@ include __DIR__ . '/../part/nav.php';
                             <input type="text" class="form-control" name="userPhone" placeholder="Enter Phone Number">
                         </div>
                         <div class="form-group">
-                            <label>부서</label>
+                            <label>소속</label>
                             <div class="input-group">
-                                <select class="form-select form-control" id="inputGroupSelect01" name="userDepart">
-                                    <option selected>Choose...</option>
-                                    <option value="1">부서1</option>
-                                    <option value="2">부서2</option>
-                                    <option value="3">부서3</option>
-                                    <option value="4">부서4</option>
+                                <select class="form-select form-control" id="inputGroupSelect01" name="departmentIdx">
+                                    <option selected>소속 선택</option>
+                                    <?php foreach ($departments as $dept): ?>
+                                        <option value="<?= $dept['departmentIdx'] ?>"><?= $dept['departmentName'] ?></option>
+                                    <?php endforeach; ?>
+                                    ?>
                                 </select>
                             </div>
                         </div>

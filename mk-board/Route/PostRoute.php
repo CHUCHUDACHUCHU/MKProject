@@ -16,13 +16,19 @@ class PostRoute extends BaseRoute {
             return $this->requireView('post', 'postRead');
         } else if ($this->routeCheck($url, "post/create", "GET")) {
             return $this->requireView('post', 'postCreate');
-        } else if ($this->routeCheck($url, "post/create", "POST")) {
-            $PostController->create();
+        } else if ($this->routeCheck($url, "post/create/form", "POST")) {
+            $PostController->createByForm();
+            return true;
+        } else if ($this->routeCheck($url, "post/create/fetch", "POST")) {
+            $PostController->createByFetch();
             return true;
         } else if ($this->routeCheck($url, "post/update", "GET")) {
             return $this->requireView('post', 'postUpdate');
-        } else if ($this->routeCheck($url, "post/update", "POST")) {
-            $PostController->update();
+        } else if ($this->routeCheck($url, "post/update/form", "POST")) {
+            $PostController->updateByForm();
+            return true;
+        } else if ($this->routeCheck($url, "post/update/fetch", "POST")) {
+            $PostController->updateByFetch();
             return true;
         } else if ($this->routeCheck($url, "post/delete", "POST")) {
             $PostController->delete();

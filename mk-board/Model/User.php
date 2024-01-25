@@ -33,8 +33,10 @@ class User extends BaseModel {
     {
         try {
             $query = "select	
-                                u.*
+                                u.*,
+                                d.departmentName
                                 from users u
+                                join departments d on u.departmentIdx = d.departmentIdx
                                 where u.userName like :search and u.deleted_at is null
                                 order by u.userIdx desc limit :start, :perPage;";
 
@@ -56,21 +58,21 @@ class User extends BaseModel {
      * @param $userName
      * @param $userEmail
      * @param $userPw
-     * @param $userDepart
+     * @param $departmentIdx
      * @param $userPhone
      * @param $userStatus
      * @return array|mixed
      */
-    public function create($userName, $userEmail, $userPw, $userDepart, $userPhone, $userStatus)
+    public function create($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus)
     {
         try {
-            $query = "INSERT INTO users (userName, userEmail, userPw, userDepart, userPhone, userStatus) 
-                                    VALUES (:userName, :userEmail, :userPw, :userDepart, :userPhone, :userStatus)";
+            $query = "INSERT INTO users (userName, userEmail, userPw, departmentIdx, userPhone, userStatus) 
+                                    VALUES (:userName, :userEmail, :userPw, :departmentIdx, :userPhone, :userStatus)";
             return $stmt = $this->conn->prepare($query)->execute([
                 'userName' => $userName,
                 'userEmail' => $userEmail,
                 'userPw' => $userPw,
-                'userDepart' => $userDepart,
+                'departmentIdx' => $departmentIdx,
                 'userPhone' => $userPhone,
                 'userStatus' => $userStatus
             ]);
@@ -84,18 +86,18 @@ class User extends BaseModel {
      * 회원 데이터 수정하기
      * 회원 부가 정보 수정하기
      * @param $userName
-     * @param $userDepart
+     * @param $departmentIdx
      * @param $userPhone
      * @param $userIdx
      * @return array|mixed
      */
-    public function updateAll($userName, $userDepart, $userPhone, $userIdx)
+    public function updateAll($userName, $departmentIdx, $userPhone, $userIdx)
     {
         try {
-            $query = "update users set userName =:userName, userDepart =:userDepart, userPhone =:userPhone where userIdx =:userIdx ";
+            $query = "update users set userName =:userName, departmentIdx =:departmentIdx, userPhone =:userPhone where userIdx =:userIdx ";
             return $this->conn->prepare($query)->execute([
                 'userName' => $userName,
-                'userDepart' => $userDepart,
+                'departmentIdx' => $departmentIdx,
                 'userPhone' => $userPhone,
                 'userIdx' => $userIdx
             ]);
@@ -204,7 +206,12 @@ class User extends BaseModel {
     public function getUserByEmail(string $userEmail)
     {
         try {
-            $query = "SELECT u.* FROM users u WHERE userEmail = :userEmail and u.deleted_at is null LIMIT 1";
+            $query = "SELECT 
+                                u.*,
+                                d.departmentName
+                                FROM users u 
+                                JOIN departments d on d.departmentIdx = u.departmentIdx
+                                WHERE userEmail = :userEmail and u.deleted_at is null LIMIT 1";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 'userEmail' => $userEmail
@@ -217,14 +224,46 @@ class User extends BaseModel {
     }
 
     /**
-     * 회원 데이터 가져오기(userEmail)
-     * @param $userIdx int User의 userEmail
+     * 회원 데이터 가져오기(userIdx)
+     * @param $userIdx int User의 userIdx
      * @return array|mixed
      */
     public function getUserById(int $userIdx)
     {
         try {
-            $query = "SELECT u.* FROM users u WHERE userIdx = :userIdx and u.deleted_at is null LIMIT 1";
+            $query = "SELECT 
+                                u.*,
+                                d.departmentName
+                                FROM users u
+                                JOIN departments d on d.departmentIdx = u.departmentIdx
+                                WHERE userIdx = :userIdx and u.deleted_at is null LIMIT 1";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                'userIdx' => $userIdx
+            ]);
+            return $stmt->fetch();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 회원 데이터 가져오기
+     * 삭제된 회원이라도 가져오기!!!
+     * 이유 : 이용 중 삭제를 당한 경우 확인하기 위해!
+     * @param $userIdx int User의 userIdx
+     * @return array|mixed
+     */
+    public function getUserByIdIncludeDeleted(int $userIdx)
+    {
+        try {
+            $query = "SELECT 
+                                u.*,
+                                d.departmentName
+                                FROM users u
+                                JOIN departments d on d.departmentIdx = u.departmentIdx
+                                WHERE userIdx = :userIdx LIMIT 1";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 'userIdx' => $userIdx

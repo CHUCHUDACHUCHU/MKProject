@@ -47,8 +47,8 @@ include __DIR__ . '/../part/head.php';
                 <tr class="text-center">
                     <th width="30">번호</th>
                     <th width="200">제목</th>
+                    <th width="50">이메일</th>
                     <th width="50">이름</th>
-                    <th width="50">부서</th>
                     <th width="30">조회수</th>
                     <th width="100">작성일</th>
                 </tr>
@@ -75,7 +75,7 @@ include __DIR__ . '/../part/head.php';
                 $endPage = $endPage < 10 && $totalPage > 10 ? 10 : $endPage;
 
                 // 게시글 전체목록 가져오기
-                $posts = $post->getAllPosts($searchWord, $startIndex, $perPage);
+                $posts = $post->getAllPostsByPaging($searchWord, $startIndex, $perPage);
 
                 if ($posts) {
                     foreach ($posts as $postInfo) {
@@ -97,7 +97,12 @@ include __DIR__ . '/../part/head.php';
                                     <?php } ?>
                                 </a>
                             </td>
-                            <td><?= $postInfo['userEmail'] ?></td>
+                            <td>
+                                <?= $postInfo['userEmail'] ?>
+                                <?php if ($postInfo['userStatus'] === '관리자') { ?>
+                                    <span class="badge badge-danger">admin</span>
+                                <?php } ?>
+                            </td>
                             <td><?= $postInfo['userName'] ?></td>
                             <td><?= $postInfo['views'] ?></td>
                             <td><?= $postInfo['created_at'] ?></td>

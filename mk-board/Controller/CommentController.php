@@ -24,21 +24,12 @@ class CommentController extends BaseController{
         $postIdx = $_POST['postIdx'];
         $userIdx = $_POST['userIdx'];
         $content = $_POST['content'];
-        $parentIdx = $_POST['parentIdx'];
 
         if ($this->parametersCheck($postIdx, $userIdx, $content)) {
-            if (empty($parentIdx)) {
-                if ($this->comment->create($postIdx, $userIdx, $content)) {
-                    $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '댓글이 작성되었습니다.');
-                } else {
-                    $this->redirectBack('댓글 작성에 실패했습니다.');
-                }
+            if ($this->comment->create($postIdx, $userIdx, $content)) {
+                $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');
             } else {
-                if ($this->comment->subReplyCreate($postIdx, $parentIdx, $userIdx, $content)) {
-                    $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '댓글이 작성되었습니다.');
-                } else {
-                    $this->redirectBack('댓글 작성에 실패했습니다.');
-                }
+                $this->redirectBack('댓글 작성에 실패했습니다.');
             }
         } else {
             $this->redirectBack('입력되지 않은 값이 있습니다!');

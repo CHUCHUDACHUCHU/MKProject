@@ -35,11 +35,10 @@ class AuthController extends BaseController{
                     // 비밀번호가 일치합니다. 세션을 저장한 후 이동합니다.
                     $_SESSION['userIdx'] = $rst['userIdx'];
                     $_SESSION['userInit'] = $rst['userInit'];
-                    $_SESSION['userStatus'] = $rst['userStatus'];
                     if($_SESSION['userInit'] === 0) {
                         $this->redirect('/mk-board/user/my-page', '첫 로그인 시 비밀번호 변경이 필요합니다!');
                     } else {
-                        $this->redirect('/mk-board/post/list', '로그인합니다!');
+                        $this->redirect('/mk-board/post/list', '');
                     }
                 } else {
                     $this->redirectBack("비밀번호가 일치하지 않습니다.");

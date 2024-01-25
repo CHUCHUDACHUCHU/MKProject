@@ -33,8 +33,18 @@ include __DIR__ . '/../part/nav.php';
                     <input type="text" class="form-control mb-1" value="<?=$nowUser['userStatus']?>" name="userPhone" readonly>
                 </div>
                 <div class="form-group mb-1">
-                    <label class="mb-1" style="font-weight: bold">부서</label>
-                    <input type="text" class="form-control mb-1" value="<?=$nowUser['userDepart']?>" name="userDepart">
+                    <label>소속</label>
+                    <div class="input-group">
+                        <select class="form-select form-control" id="inputGroupSelect01" name="departmentIdx">
+                            <option selected>소속 선택</option>
+                            <?php foreach ($departments as $dept): ?>
+                                <?php $selected = ($dept['departmentIdx'] == $nowUser['departmentIdx']) ? 'selected' : ''; ?>
+                                <option value="<?= $dept['departmentIdx'] ?>" <?= $selected ?>>
+                                    <?= $dept['departmentName'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group mb-1">
                     <label class="mb-1" style="font-weight: bold">휴대폰</label>
@@ -172,7 +182,7 @@ include __DIR__ . '/../part/nav.php';
                     $endPage = $endPage < 10 && $totalPage > 10 ? 10 : $endPage;
 
                     // 게시글 전체목록 가져오기
-                    $posts = $post->getMyPosts($nowUser['userIdx'], $searchWord, $startIndex, $perPage);
+                    $posts = $post->getMyPostsByPaging($nowUser['userIdx'], $searchWord, $startIndex, $perPage);
 
                     if ($posts) {
                         foreach ($posts as $postInfo) {

@@ -67,6 +67,19 @@ trait ControllerUtils   {
         return true;
     }
 
+    /**
+     * 파일 용량 format
+     */
+    public function formatSizeUnits($bytes) {
+        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= (1 << (10 * $pow));
+
+        return round($bytes, 2) . ' ' . $units[$pow];
+    }
+
     public function sendEmail($userEmail, $subject, $body): string
     {
         $mail = new PHPMailer();

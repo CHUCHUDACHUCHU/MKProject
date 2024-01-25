@@ -23,3 +23,72 @@
 .navbar-collapse {
     font-size: 20px;
 }
+
+.dropzone {
+    width: 98%;
+    margin: 1%;
+    border: 2px dashed #3498db !important;
+    border-radius: 5px;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+.dropzone.dz-drag-hover {
+    border: 2px solid #3498db !important;
+}
+
+.dz-message.needsclick img {
+    width: 50px;
+    display: block;
+    margin: auto;
+    opacity: .6;
+    margin-bottom: 15px;
+}
+
+span.plus {
+    display: none;
+}
+
+.dropzone.dz-started .dz-message {
+    display: inline-block !important;
+    width: 120px;
+    float: right;
+    border: 1px solid rgba(238, 238, 238, 0.36);
+    border-radius: 30px;
+    height: 120px;
+    margin: 16px;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+.dropzone.dz-started .dz-message span.text {
+    display: none;
+}
+
+.dropzone.dz-started .dz-message span.plus {
+    display: block;
+    font-size: 70px;
+    color: #AAA;
+    line-height: 110px;
+}
+
+/* 파일 리스트 스타일 조정 */
+#dropzone-preview-list .border {
+    border-width: 1px !important; /* 원하는 테두리 두께로 조정 */
+}
+
+/* 파일 리스트 이미지 스타일 조정 */
+#dropzone-preview img {
+    max-width: 100% !important; /* 이미지의 최대 너비를 100%로 조정 */
+    height: 50px !important; /* 이미지의 높이를 자동으로 조정하여 비율 유지 */
+    width: 50px !important; /* 이미지의 높이를 자동으로 조정하여 비율 유지 */
+}
+
+body > div > form > div.dropzone.dz-clickable {
+    min-height: 10px !important; /* 이미지의 높이를 자동으로 조정하여 비율 유지 */
+    padding: 10px 10px !important;
+}
+
+body > div > form > div.dropzone.dz-clickable > div > button {
+    color: #ced4da !important;
+}

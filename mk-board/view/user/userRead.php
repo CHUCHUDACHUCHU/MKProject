@@ -22,23 +22,23 @@ include __DIR__ . '/../part/nav.php';
             <form action="/mk-board/user/update/all" method="post">
                 <div class="form-group mb-1">
                     <label>userName</label>
-                    <input type="text" class="form-control"  value="<?=$requireUser['userName']?>" name="userName" placeholder="Enter your userName" readonly>
+                    <input type="text" class="form-control"  value="<?=$requireUser['userName']?>" name="userName" readonly>
                 </div>
                 <div class="form-group mb-1">
                     <label>userEmail</label>
-                    <input type="text" class="form-control" value="<?=$requireUser['userEmail']?>" name="userEmail" placeholder="Enter your userEmail" readonly >
+                    <input type="text" class="form-control" value="<?=$requireUser['userEmail']?>" name="userEmail" readonly >
                 </div>
                 <div class="form-group mb-1">
                     <label>userStatus</label>
-                    <input type="text" class="form-control" value="<?=$requireUser['userStatus']?>" name="userPhone" placeholder="Enter your userPhone" readonly>
+                    <input type="text" class="form-control" value="<?=$requireUser['userStatus']?>" name="userPhone" readonly>
                 </div>
                 <div class="form-group mb-1">
-                    <label>userDepart</label>
-                    <input type="text" class="form-control" value="<?=$requireUser['userDepart']?>" name="userDepart" placeholder="Enter your userDepart" readonly>
+                    <label>소속</label>
+                    <input type="text" class="form-control" value="<?=$requireUser['departmentName']?>" name="departmentIdx" readonly>
                 </div>
                 <div class="form-group mb-1">
                     <label>userPhone</label>
-                    <input type="text" class="form-control" value="<?=$requireUser['userPhone']?>" name="userPhone" placeholder="Enter your userPhone" readonly>
+                    <input type="text" class="form-control" value="<?=$requireUser['userPhone']?>" name="userPhone" readonly>
                 </div>
             </form>
         </div>
@@ -104,7 +104,7 @@ include __DIR__ . '/../part/nav.php';
                     $endPage = $endPage < 10 && $totalPage > 10 ? 10 : $endPage;
 
                     // 게시글 전체목록 가져오기
-                    $posts = $post->getMyPosts($requireUser['userIdx'], $searchWord, $startIndex, $perPage);
+                    $posts = $post->getMyPostsByPaging($requireUser['userIdx'], $searchWord, $startIndex, $perPage);
 
                     if ($posts) {
                         foreach ($posts as $postInfo) {

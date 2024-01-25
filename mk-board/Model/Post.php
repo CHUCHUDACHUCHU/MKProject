@@ -11,14 +11,15 @@ class Post extends BaseModel {
         parent::__construct();
     }
 
-    public function getAllPosts(string $search, int $start, int $perPage): array
+    public function getAllPostsByPaging(string $search, int $start, int $perPage): array
     {
         try {
             $query = "select	
                                 p.*,
                                 u.userName,
                                 u.userEmail,
-		                        (select count(*) from comments c where c.postIdx = p.postIdx) as comment_count,
+                                u.userStatus,
+		                        (select count(*) from comments c where c.postIdx = p.postIdx and c.deleted_at is null) as comment_count,
                                 case when timestampdiff(minute, p.created_at, now()) <= 1440 then 1
                                 else 0 end as is_new
                                 from posts p
@@ -39,7 +40,7 @@ class Post extends BaseModel {
         }
     }
 
-    public function getMyPosts(int $userIdx, string $search, int $start, int $perPage): array
+    public function getMyPostsByPaging(int $userIdx, string $search, int $start, int $perPage): array
     {
         try {
             $query = "select	
@@ -68,13 +69,33 @@ class Post extends BaseModel {
         }
     }
 
+    public function getMyAllPosts(int $userIdx): array
+    {
+        try {
+            $query = "select p.*
+                        from posts p
+                        join users u on p.userIdx = u.userIdx
+                        where u.userIdx =:userIdx and p.deleted_at is null
+                      ";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                'userIdx' => $userIdx,
+            ]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
 
     /**
      * Post 데이터 가져오기
      * @param int $postIdx
      * @return array|mixed
      */
-    public function getPost(int $postIdx)
+    public function getPostById(int $postIdx)
     {
         try {
             $query = "select
@@ -100,17 +121,19 @@ class Post extends BaseModel {
      * @param int $userIdx
      * @param string $title
      * @param string $content
-     * @return bool
+     * @return array|mixed
      */
-    public function create(int $userIdx, string $title, string $content): bool
+    public function create(int $userIdx, string $title, string $content)
     {
         try {
             $query = "INSERT INTO posts (userIdx, title,content) VALUES (:userIdx, :title, :content)";
-            return $this->conn->prepare($query)->execute([
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
                 'userIdx' => $userIdx,
                 'title' => $title,
                 'content' => $content
             ]);
+            return $this->conn->lastInsertId();
         } catch (PDOException $e) {
             error_log($e->getMessage());
             return false;
@@ -149,6 +172,24 @@ class Post extends BaseModel {
             $query = "update posts set deleted_at = NOW() where postIdx =:postIdx";
             return $this->conn->prepare($query)->execute([
                 'postIdx' => $postIdx
+            ]);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 삭제된 User에 해당하는 post 논리적 삭제
+     * @param $userIdx
+     * @return bool
+     */
+    public function deletePostsByUser($userIdx): bool
+    {
+        try {
+            $query = "UPDATE posts SET deleted_at = NOW() WHERE userIdx = :userIdx";
+            return $this->conn->prepare($query)->execute([
+                'userIdx' => $userIdx,
             ]);
         } catch (PDOException $e) {
             error_log($e->getMessage());

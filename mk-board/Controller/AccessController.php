@@ -58,10 +58,9 @@ class AccessController extends BaseController{
             'test/session'
         ];
 
-        // 5. 회원의 상태가 정지일 때 : $_SESSION['userStatus'] === '정지'
+        // 5. 회원의 상태가 정지일 때 : $nowUser['userStatus'] === '정지'
 
         $stopUserPossibleUrl = [
-            'user/stop',
             'auth/logout'
         ];
 
@@ -75,9 +74,10 @@ class AccessController extends BaseController{
                 return;
             }
         } else {
-            if($_SESSION['userStatus'] === '정지') {
+            $nowUser = $this->user->getUserByIdIncludeDeleted($_SESSION['userIdx']);
+            if($nowUser['userStatus'] === '정지' || $nowUser['deleted_at']) {
                 if(!in_array($url, $stopUserPossibleUrl)) {
-                    $this->redirect('/mk-board/auth/logout', '정지상태입니다.\n관리자에게 문의하세요.\nEmail : chu.gyoyoon@mkinternet.com');
+                    $this->redirect('/mk-board/auth/logout', '정지 혹은 삭제 상태입니다.\n관리자에게 문의하세요.\nEmail : chu.gyoyoon@mkinternet.com');
                     return;
                 }
             }
@@ -88,7 +88,6 @@ class AccessController extends BaseController{
                 }
             }
         }
-
     }
 
 }
