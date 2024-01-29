@@ -69,6 +69,7 @@ class AccessController extends BaseController{
         $commonUserImpossibleUrl = [
             'user/manage',
             'post/manage',
+            'user/read',
         ];
 
 
