@@ -31,6 +31,8 @@ class User
             userEmail	VARCHAR(30)	NOT NULL,
             userPw	VARCHAR(100),
             departmentIdx	INT DEFAULT 1,
+            userStatus  VARCHAR(10) DEFAULT '대기',
+            userInit    INT DEFAULT 0,
             userPhone	VARCHAR(30),
             created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

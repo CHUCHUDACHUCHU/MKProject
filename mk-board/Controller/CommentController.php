@@ -1,6 +1,7 @@
 <?php
 namespace Controller;
 use Model\Comment;
+use Model\Post;
 
 /**
  * CommentCotroller
@@ -10,9 +11,11 @@ use Model\Comment;
 
 class CommentController extends BaseController{
     private $comment;
+    private $post;
 
     public function __construct() {
         $this->comment = new Comment();
+        $this->post = new Post();
     }
 
     /**
@@ -24,10 +27,14 @@ class CommentController extends BaseController{
         $postIdx = $_POST['postIdx'];
         $userIdx = $_POST['userIdx'];
         $content = $_POST['content'];
-
         if ($this->parametersCheck($postIdx, $userIdx, $content)) {
             if ($this->comment->create($postIdx, $userIdx, $content)) {
-                $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');
+                if(isset($_POST['reject'])) {
+                    $this->post->updateStatus('반려', $postIdx);
+                    $this->redirectBack('게시글 권한이 반려되었습니다.');
+                } else {
+                    $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');
+                }
             } else {
                 $this->redirectBack('댓글 작성에 실패했습니다.');
             }

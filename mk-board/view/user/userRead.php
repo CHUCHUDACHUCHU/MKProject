@@ -73,12 +73,12 @@ include __DIR__ . '/../part/nav.php';
                     </form>
                 </div>
                 <!-- 게시물 목록 테이블 -->
-                <table class="table table-bordered">
+                <table class="table my-table-bordered">
                     <thead>
                     <tr class="text-center">
                         <th width="80">번호</th>
                         <th width="300">제목</th>
-                        <th width="50">조회수</th>
+                        <th width="50">상태</th>
                         <th width="100">작성일</th>
                     </tr>
                     </thead>
@@ -100,14 +100,30 @@ include __DIR__ . '/../part/nav.php';
                     $totalPage = ceil($total / $perPage);
 
                     // 현재 페이지에서 보여줄 마지막 페이지
-                    $endPage = $totalPage > $currentPage + 4 ? $currentPage + 4 : $totalPage;
-                    $endPage = $endPage < 10 && $totalPage > 10 ? 10 : $endPage;
+                    $endPage = min($totalPage, $currentPage + 4);
+                    $endPage = max(1, $endPage);
 
                     // 게시글 전체목록 가져오기
-                    $posts = $post->getMyPostsByPaging($requireUser['userIdx'], $searchWord, $startIndex, $perPage);
+                    $posts = $post->getMyPostsByMyPage($requireUser['userIdx'], $searchWord, $startIndex, $perPage);
 
                     if ($posts) {
                         foreach ($posts as $postInfo) {
+
+                            $postStatusColor = '#17a2b8';
+                            $tableColor = '#fff';
+                            $lockEmoji = '';
+                            if ($postInfo['postStatus'] === '대기') {
+                                $postStatusColor = '#ff9800';
+                                $lockEmoji = '🔒';
+                            } else if($postInfo['postStatus'] === '반려') {
+                                $postStatusColor = '#dc3545';
+                                $lockEmoji = '🔒';
+                            } else if($postInfo['postStatus'] === '공지') {
+                                $postStatusColor = '#6c757d';
+                                $tableColor = 'gainsboro';
+                                $lockEmoji = '🚨';
+                            }
+
                             /// 30 글자 초과시 ... 저리
                             $title = $postInfo["title"];
                             if (strlen($title) > 30) {
@@ -116,17 +132,17 @@ include __DIR__ . '/../part/nav.php';
                             }
                             ?>
 
-                            <tr class="text-center">
+                            <tr class="text-center" style="background-color: <?= $tableColor ?>">
                                 <td><?= $postInfo['postIdx'] ?></td>
                                 <td>
                                     <a href="/mk-board/post/read?postIdx=<?= $postInfo['postIdx'] ?>">
-                                        <?= htmlspecialchars($title) . " [" . $postInfo['comment_count'] . "]"; ?>
-                                        <?php if ($postInfo['is_new']) { ?>
-                                            <span class="badge badge-primary">new</span>
+                                        <?php if ($postInfo['postStatus'] !== '승인') { ?>
+                                            <span><?= $lockEmoji ?></span>
                                         <?php } ?>
+                                        <?= htmlspecialchars($title) . " [" . $postInfo['comment_count'] . "]"; ?>
                                     </a>
                                 </td>
-                                <td><?= $postInfo['views'] ?></td>
+                                <td><span class="badge badge-primary" style="background-color: <?= $postStatusColor ?>!important;"><?= $postInfo['postStatus'] ?></span></td>
                                 <td><?= $postInfo['created_at'] ?></td>
                             </tr>
                             <?php

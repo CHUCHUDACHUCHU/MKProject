@@ -29,6 +29,7 @@ class PostController extends BaseController {
         $requestData = json_decode(file_get_contents("php://input"), true);
         $title = $requestData['title'];
         $content = $requestData['content'];
+        $commonOrNotifyRadio = $requestData['commonOrNotifyRadio'];
         $userIdx = $_SESSION['userIdx'];
 
         $result = [
@@ -36,8 +37,8 @@ class PostController extends BaseController {
             'message' => ''
         ];
 
-        if($this->parametersCheck($userIdx, $title, $content)) {
-            $postIdx = $this->post->create($userIdx, $title, $content);
+        if($this->parametersCheck($userIdx, $title, $content, $commonOrNotifyRadio)) {
+            $postIdx = $this->post->create($userIdx, $title, $content, $commonOrNotifyRadio);
             if($postIdx) {
                 $result['status'] = 'success';
                 $result['message'] = '게시글 DB 생성에 성공하였습니다.';
@@ -62,9 +63,10 @@ class PostController extends BaseController {
         $title = $_POST['title'];
         $content = $_POST['content'];
         $userIdx = $_SESSION['userIdx'];
+        $commonOrNotifyRadio = $_POST['commonOrNotifyRadio'];
 
-        if ($this->parametersCheck($userIdx, $title, $content)) {
-            $postIdx = $this->post->create($userIdx, $title, $content);
+        if ($this->parametersCheck($userIdx, $title, $content, $commonOrNotifyRadio)) {
+            $postIdx = $this->post->create($userIdx, $title, $content, $commonOrNotifyRadio);
             if ($postIdx) {
                 $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');
             } else {
@@ -124,6 +126,36 @@ class PostController extends BaseController {
             $this->redirectBack('입력되지 않은 값이 있습니다.');
         }
     }
+
+
+    /**
+     * 게시글 권한 변경 요청
+     */
+    public function updateStatus() {
+        $requestData = json_decode(file_get_contents("php://input"), true);
+        $postStatus = $requestData['postStatus'];
+        $postIdx = $requestData['postIdx'];
+        $result = [
+            'status' => '',
+            'message' => ''
+        ];
+
+
+        if($this->parametersCheck($postStatus, $postIdx)) {
+            if($this->post->updateStatus($postStatus, $postIdx)) {
+                $result['status'] = 'success';
+                $result['message'] = '게시글 권한 변경에 성공하였습니다.';
+            } else {
+                $result['status'] = 'fail';
+                $result['message'] = 'DB 변경에 실패하였습니다.';
+            }
+        } else {
+            $result['status'] = 'fail';
+            $result['message'] = '입력되지 않은 값이 있습니다.';
+        }
+        $this->echoJson(['result' => $result]);
+    }
+    
 
     /**
      * Post 삭제하기 (논리적!)

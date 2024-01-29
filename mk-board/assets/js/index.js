@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function (event) {
 
     /**
      * 네이게이션바 로그인세션타임
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (currentPath === '/mk-board/user/manage') {
         document.getElementById("manageUserNav").classList.add("active");
     } else if (currentPath === '/mk-board/post/manage') {
-        document.getElementById("managerPostNav").classList.add("active");
+        document.getElementById("managePostNav").classList.add("active");
     }
 
 
@@ -245,6 +245,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
             }
         })
+    } 
+    
+    
+    /**
+     * 이메일 전체보내기 테스트
+     * */
+    const emailAllTest = document.querySelector('.emailAllTest');
+    if(emailAllTest) {
+        emailAllTest.addEventListener('click', function () {
+            const userEmail = document.querySelector('.userEmail');
+            const userName = document.querySelector('.userName');
+            const departmentName = document.querySelector('.departmentName');
+
+            console.log(userEmail);
+
+            // fetch(`/mk-board/user/update/email`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({
+            //         changeEmail: email.value,
+            //     }),
+            // })
+            //     .then((res) => {
+            //         if (res.status !== 200) {
+            //             throw new Error('Network response was not 200');
+            //         }
+            //         return res.json();
+            //     })
+            //     .then((data) => {
+            //         if(data.result.status === 'success') {
+            //             alert(data.result.message);
+            //             location.href='/mk-board/user/my-page';
+            //         } else {
+            //             alert(data.result.message);
+            //         }
+            //     })
+            //     .catch((err) => {
+            //         alert('이메일 수정 요청 : fetch 에러 ' + err);
+            //     });
+        })
     }
 
     /**
@@ -291,9 +333,9 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * 회원 권한 변경 요청 이벤트 등록
      * */
-    const dropdownItems = document.querySelectorAll('.dropdown-item');
-    if(dropdownItems) {
-        dropdownItems.forEach(function (item) {
+    const userStatusDropdownItems = document.querySelectorAll('.user-status-dropdown-item');
+    if(userStatusDropdownItems) {
+        userStatusDropdownItems.forEach(function (item) {
             item.addEventListener('click', function () {
                 const selectedValue = this.getAttribute('data-value');
                 const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
@@ -550,6 +592,137 @@ document.addEventListener('DOMContentLoaded', function () {
                 location.href = currentUrl.split('?')[0] + '?' + urlSearchParams.toString();
             });
         });
+    }
+
+
+    /**
+     * 게시글 권한 변경 요청 이벤트 등록 (외부에서)
+     * */
+    const postDropdownItems = document.querySelectorAll('.post-status-dropdown-item');
+    if(postDropdownItems) {
+        postDropdownItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const selectedValue = this.getAttribute('data-value');
+                const postIdx = this.closest('.postInfoDashboard').querySelector('.postIdx').textContent;
+
+                //조회한 적이 있는지 확인하고 있다면, 외부에서 권한 변경 가능!
+                const cookieName = `post_views${postIdx}=1`;
+                const hasCookie = document.cookie.includes(cookieName);
+
+                if(hasCookie) {
+                    if(confirm('정말 변경하시겠습니까?')) {
+                        fetch(`/mk-board/post/update/status`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                postIdx: postIdx,
+                                postStatus: selectedValue
+                            }),
+                        })
+                            .then((res) => {
+                                if (res.status !== 200) {
+                                    throw new Error('Network response was not 200');
+                                }
+                                return res.json();
+                            })
+                            .then((data) => {
+                                if(data.result.status === 'success') {
+                                    location.reload();
+                                } else {
+                                    alert(data.result.message);
+                                }
+                            })
+                            .catch((err) => {
+                                alert('게시글 권한 변경 요청 : fetch 에러 ' + err);
+                            });
+                    }
+                } else {
+                    alert('게시글을 조회한 뒤 권한 변경을 해주세요.')
+                    window.location.href = `/mk-board/post/read?postIdx=${postIdx}`;
+                }
+
+            });
+        });
+    }
+
+    /**
+     * 게시글 반려 시 사유 작성 모달창 이벤트
+     * */
+    const openRejectMessageModal = document.querySelectorAll('.openRejectMessageModal');
+    if(openRejectMessageModal) {
+        openRejectMessageModal.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const postIdx = this.closest('.postStatusBox').querySelector('.postIdx').value;
+                console.log(postIdx);
+                const rejectMessageModal = $('#rejectMessageModal');
+                rejectMessageModal.find('#modalPostIdx').val(postIdx);
+                rejectMessageModal.modal('show');
+            })
+        })
+    }
+
+
+    /**
+     * 게시글 권한 변경 요청 이벤트 등록 (내부에서)
+     * */
+    const postStatusOptions = document.getElementsByName('postStatusOptions');
+    if(postStatusOptions) {
+        postStatusOptions.forEach(function (postStatusOption) {
+            postStatusOption.addEventListener('click', function () {
+                // 클릭된 라디오 버튼의 값을 가져와서 사용할 수 있습니다.
+                const selectedValue = this.value;
+                const postIdx = document.getElementById('postIdx').value;
+
+                if(selectedValue === '반려') {
+
+                }
+
+                fetch(`/mk-board/post/update/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        postIdx: postIdx,
+                        postStatus: selectedValue
+                    }),
+                })
+                    .then((res) => {
+                        if (res.status !== 200) {
+                            throw new Error('Network response was not 200');
+                        }
+                        return res.json();
+                    })
+                    .then((data) => {
+                        if(data.result.status === 'success') {
+                            alert(data.result.message);
+                            location.reload();
+                        } else {
+                            alert(data.result.message);
+                        }
+                    })
+                    .catch((err) => {
+                        alert('게시글 권한 변경 요청 : fetch 에러 ' + err);
+                    });
+            });
+        });
+    }
+
+
+    /**
+     * 게시글 반려 시 사유 작성 모달창 이벤트(내부에서)
+     * */
+    const openRejectMessageModal1 = document.getElementById('openRejectMessageModal1');
+    if(openRejectMessageModal1) {
+        openRejectMessageModal1.addEventListener('click', function () {
+            const postIdx = document.getElementById('postIdx').value;
+            console.log(postIdx);
+            const rejectMessageModal = $('#rejectMessageModal');
+            rejectMessageModal.find('#modalPostIdx').val(postIdx);
+            rejectMessageModal.modal('show');
+        })
     }
 
 

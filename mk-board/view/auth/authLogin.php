@@ -65,12 +65,13 @@ include __DIR__ . '/../part/head.php';
                         </div>
                     </div>
                     </br>
-                    <span style="font-size: small; font-weight: bolder">임시 계정[아이디 : admin, 비밀번호 : c]로 로그인하실 수 있습니다.</span><br>
-                    <span style="font-size: small; font-weight: bolder; color: #ff9800">현재 가능한 기능</span>
+                    <span style="font-size: small; font-weight: bolder">!!!임시 알림!!!</span><br>
+                    <span style="font-size: small; font-weight: bolder">체험용 관리자 계정[아이디 : admin, 비밀번호 : c]로 로그인하실 수 있습니다.</span><br>
+                    <span style="font-size: small; font-weight: bolder; color: #ff9800">알림</span>
                     <ul>
-                        <li>로그인, 로그아웃 기능</li>
-                        <li>전체게시글 확인, 검색, 페이지네이션</li>
-                        <li>게시글 작성, 수정, 삭제</li>
+                        <li>담당자(추교윤)에게 계정생성을 요청하세요.</li>
+                        <li>담당자에게 네이트온으로 이메일 주소를 보내주시면 </li>
+                        <li>체험용 일반 계정을 생성해드립니다.</li>
                     </ul>
                 </div>
             </div>

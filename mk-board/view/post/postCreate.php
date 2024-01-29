@@ -5,6 +5,12 @@ include __DIR__ . '/../part/head.php';
 <body>
     <?php
     include __DIR__ . '/../part/nav.php';
+    $radioAccess = 'none';
+    $radioValue = '대기';
+    if($nowUser['userStatus'] === '관리자') {
+        $radioAccess = 'block';
+        $radioValue = '승인';
+    }
     ?>
     <div class="container mt-5">
         <h3 class="d-inline" style="font-weight: bolder">게시물 작성</h3>
@@ -16,6 +22,16 @@ include __DIR__ . '/../part/head.php';
                 <input type="text" class="form-control mb-2" id="title" name="title" placeholder="제목을 입력하세요">
                 <input type="text" class="form-control" value="<?=$nowUser['userEmail']?>" readonly>
             </div>
+
+            <div class="custom-control custom-radio" style="display: <?= $radioAccess ?>">
+                <input type="radio" id="commonRadio" name="commonOrNotifyRadio" class="custom-control-input" value="<?= $radioValue ?>" checked>
+                <label class="custom-control-label" for="commonRadio">일반 게시글</label>
+            </div>
+            <div class="custom-control custom-radio" style="display: <?= $radioAccess ?>">
+                <input type="radio" id="notifyRadio" name="commonOrNotifyRadio" class="custom-control-input" value="공지">
+                <label class="custom-control-label" for="notifyRadio" style="color: #dc3545;">공지 게시글</label>
+            </div>
+            <br/>
 
 <!--            드롭존-->
             <div class="dropzone"></div>
@@ -78,6 +94,13 @@ include __DIR__ . '/../part/head.php';
         maxFiles: maxFilesAllowed,                                            //최대 갯수
         parallelUploads: maxFilesAllowed,                                     //동시 최대 갯수
         maxFilesize: maxFileSize,                                        // 최대업로드용량 : 100MB
+        acceptedFiles:  'image/*, ' +
+                        'application/pdf, ' +
+                        'application/msword, ' +
+                        'application/vnd.ms-excel, ' +
+                        'application/vnd.ms-powerpoint, ' +
+                        'text/plain, ' +
+                        'application/zip',
         dictMaxFilesExceeded: `파일 갯수가 너무 많습니다. 최대${maxFilesAllowed}개 입니다.`,
         dictFileTooBig: `${maxFileSize}MB를 초과합니다. 파일을 삭제해주세요.`
 
@@ -152,6 +175,14 @@ include __DIR__ . '/../part/head.php';
     function savePostToDB() {
         const title = document.getElementById('title');
         const content = document.getElementById('content');
+        const radioButtons = document.getElementsByName("commonOrNotifyRadio");
+        let selectedValue = null;
+        radioButtons.forEach(function (radioButton) {
+            if (radioButton.checked) {
+                selectedValue = radioButton;
+            }
+        });
+
         console.log('게시글 DB 저장 요청');
         fetch('/mk-board/post/create/fetch', {
             method: 'POST',
@@ -160,7 +191,8 @@ include __DIR__ . '/../part/head.php';
             },
             body: JSON.stringify({
                 title: title.value,
-                content: content.value
+                content: content.value,
+                commonOrNotifyRadio: selectedValue.value
             }),
         })
             .then((res) => {

@@ -284,7 +284,7 @@ class UserController extends BaseController {
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userEmail = $requestData['userEmail'];
         $userIdx = $this->user->getUserByEmail($userEmail)['userIdx'];
-        $posts = $this->post->getMyAllPosts($userIdx);
+        $posts = $this->post->getMyAllPostsForDelete($userIdx);
         $result = [
             'status' => '',
             'message' => ''

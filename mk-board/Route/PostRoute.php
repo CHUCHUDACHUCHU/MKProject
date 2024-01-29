@@ -30,6 +30,11 @@ class PostRoute extends BaseRoute {
         } else if ($this->routeCheck($url, "post/update/fetch", "POST")) {
             $PostController->updateByFetch();
             return true;
+        } else if ($this->routeCheck($url, "post/update/status", "POST")) {
+            $PostController->updateStatus();
+            return true;
+        } else if ($this->routeCheck($url, "post/manage", "GET")) {
+            return $this->requireView('post', 'postManage');
         } else if ($this->routeCheck($url, "post/delete", "POST")) {
             $PostController->delete();
             return true;

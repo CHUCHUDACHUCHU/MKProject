@@ -64,6 +64,15 @@ class AccessController extends BaseController{
             'auth/logout'
         ];
 
+        // 6. 일반 회원이 가지 못하는 url
+
+        $commonUserImpossibleUrl = [
+            'user/manage',
+            'post/manage',
+        ];
+
+
+
         if (empty($url) || $url == '/') {
             $this->redirect('/mk-board/auth/login', '');
         } else if ($url == 'auth/login' && isset($_SESSION['userIdx'])) {
@@ -87,7 +96,10 @@ class AccessController extends BaseController{
                     return;
                 }
             }
+            if($nowUser['userStatus'] === '일반' && in_array($url, $commonUserImpossibleUrl)) {
+                $this->redirect('/mk-board/', '접근할 수 없는 권한입니다.');
+                return;
+            }
         }
     }
-
 }

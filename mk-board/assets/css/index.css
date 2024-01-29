@@ -24,6 +24,48 @@
     font-size: 20px;
 }
 
+.table-bordered {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.table-bordered th, .table-bordered td {
+    text-align: center;
+    padding: 8px; /* 셀 안의 내용과 경계 사이의 간격을 조절할 수 있습니다. */
+    overflow: hidden;
+    text-overflow: ellipsis; /* 긴 텍스트가 있을 경우 줄임표로 표시하도록 설정 */
+    white-space: nowrap; /* 텍스트 줄 바꿈을 방지하고, 긴 텍스트를 한 줄에 표시하도록 설정 */
+}
+
+.table-bordered th:nth-child(1) {
+    max-width: 30px;
+}
+
+.table-bordered th:nth-child(2) {
+    max-width: 200px;
+}
+
+.table-bordered th:nth-child(3) {
+    max-width: 50px;
+}
+
+.table-bordered th:nth-child(4) {
+    max-width: 30px;
+}
+
+.table-bordered th:nth-child(5) {
+    max-width: 30px;
+}
+
+.table-bordered th:nth-child(6) {
+    max-width: 30px;
+}
+
+.table-bordered th:nth-child(7) {
+    max-width: 80px;
+}
+
+
 .dropzone {
     width: 98%;
     margin: 1%;

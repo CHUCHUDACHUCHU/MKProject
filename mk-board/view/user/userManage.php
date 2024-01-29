@@ -46,8 +46,8 @@ include __DIR__ . '/../part/nav.php';
             $totalPage = ceil($total / $perPage);
 
             // 현재 페이지에서 보여줄 마지막 페이지
-            $endPage = $totalPage > $currentPage + 4 ? $currentPage + 4 : $totalPage;
-            $endPage = $endPage < 10 && $totalPage > 10 ? 10 : $endPage;
+            $endPage = min($totalPage, $currentPage + 4);
+            $endPage = max(1, $endPage);
 
             // 사용자 전체목록 가져오기
             $users = $user->getAllUsers($searchWord, $startIndex, $perPage);
@@ -75,13 +75,13 @@ include __DIR__ . '/../part/nav.php';
                             </div>
                             <div class="col-md-3 row justify-content-end">
                                 <div aria-label="Button group with nested dropdown" class="d-flex">
-                                    <button type="button" class="btn btn-primary dropdown-toggle" style="background-color: <?=$userStatusColor?> !important; width: 90px" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" style="background-color: <?=$userStatusColor?> !important; width: 90px" data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false">
                                         <?= $userInfo['userStatus'] ?>
                                     </button>
                                     <ul class="dropdown-menu" style="cursor: pointer">
-                                        <li><a class="dropdown-item" data-value="관리자">관리자</a></li>
-                                        <li><a class="dropdown-item" data-value="일반">일반</a></li>
-                                        <li><a class="dropdown-item" data-value="정지">정지</a></li>
+                                        <li><a class="dropdown-item user-status-dropdown-item" data-value="관리자">관리자</a></li>
+                                        <li><a class="dropdown-item user-status-dropdown-item" data-value="일반">일반</a></li>
+                                        <li><a class="dropdown-item user-status-dropdown-item" data-value="정지">정지</a></li>
                                     </ul>
                                 </div>
                                 <button type="button" class="btn btn-danger ml-auto userDeleteBtn">삭제</button>
@@ -134,11 +134,11 @@ include __DIR__ . '/../part/nav.php';
                     <form action="/mk-board/user/create" method="post" id="userCreationForm">
                         <div class="form-group">
                             <label>이름</label>
-                            <input type="text" class="form-control" name="userName" placeholder="Enter Name">
+                            <input type="text" class="form-control userName" name="userName" placeholder="Enter Name">
                         </div>
                         <div class="form-group">
                             <label>이메일</label>
-                            <input type="text" class="form-control" name="userEmail" placeholder="Enter Email">
+                            <input type="text" class="form-control userEmail" name="userEmail" placeholder="Enter Email">
                         </div>
                         <div class="form-group">
                             <label>휴대폰</label>
@@ -150,9 +150,8 @@ include __DIR__ . '/../part/nav.php';
                                 <select class="form-select form-control" id="inputGroupSelect01" name="departmentIdx">
                                     <option selected>소속 선택</option>
                                     <?php foreach ($departments as $dept): ?>
-                                        <option value="<?= $dept['departmentIdx'] ?>"><?= $dept['departmentName'] ?></option>
+                                        <option class="departmentName" value="<?= $dept['departmentIdx'] ?>"><?= $dept['departmentName'] ?></option>
                                     <?php endforeach; ?>
-                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -171,6 +170,7 @@ include __DIR__ . '/../part/nav.php';
 
                         <button type="submit" class="btn btn-primary float-right"
                                 style="background-color: dodgerblue !important;">사용자 생성</button>
+<!--                        <button type="button" class="btn btn-primary emailAllTest">이메일 전체 전송 테스트</button>-->
                     </form>
                 </div>
             </div>

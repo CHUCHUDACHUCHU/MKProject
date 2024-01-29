@@ -11,7 +11,104 @@ class Post extends BaseModel {
         parent::__construct();
     }
 
-    public function getAllPostsByPaging(string $search, int $start, int $perPage): array
+    public function getManagePosts(string $search, int $start, int $perPage, string $postStatus = null, string $departmentName=null): array
+    {
+        try {
+            $query = "SELECT
+                    p.*,
+                    u.userName,
+                    u.userEmail,
+                    u.userStatus,
+                    d.departmentName,
+                    (SELECT COUNT(*) FROM comments c WHERE c.postIdx = p.postIdx AND c.deleted_at IS NULL) AS comment_count
+                FROM
+                    posts p
+                    JOIN users u ON p.userIdx = u.userIdx
+                    JOIN departments d ON u.departmentIdx = d.departmentIdx
+                WHERE
+                    p.title LIKE :search
+                    AND u.userStatus != '관리자'
+                    AND p.deleted_at IS NULL";
+
+            // $postStatus 값이 주어진 경우에만 추가적인 필터링
+            if (!empty($postStatus)) {
+                $query .= " AND p.postStatus = :postStatus";
+            }
+            if (!empty($departmentName)) {
+                $query .= " AND d.departmentName = :departmentName";
+            }
+
+            $query .= " ORDER BY p.postIdx DESC LIMIT :start, :perPage;";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+            $stmt->bindParam('start', $start, PDO::PARAM_INT);
+            $stmt->bindParam('perPage', $perPage, PDO::PARAM_INT);
+
+            // $postStatus 값이 주어진 경우에만 바인딩 추가
+            if (!empty($postStatus)) {
+                $stmt->bindValue('postStatus', $postStatus);
+            }
+            if (!empty($departmentName)) {
+                $stmt->bindValue('departmentName', $departmentName);
+            }
+
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Post 목록의 개수
+     * @param string $search
+     * @param string $postStatus
+     * @param string $departmentName
+     * @return int|mixed
+     */
+    public function countManagePosts(string $search, string $postStatus, string $departmentName): int
+    {
+        try {
+            $query = "SELECT count(p.postIdx) 
+                        FROM posts p 
+                        JOIN users u ON p.userIdx = u.userIdx
+                        JOIN departments d ON u.departmentIdx = d.departmentIdx
+                        WHERE title like :search 
+                          and u.userStatus != '관리자'
+                          and p.deleted_at is null";
+
+            // $postStatus 값이 주어진 경우에만 추가적인 필터링
+            if (!empty($postStatus)) {
+                $query .= " AND p.postStatus = :postStatus";
+            }
+            if (!empty($departmentName)) {
+                $query .= " AND d.departmentName = :departmentName";
+            }
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+
+            // $postStatus 값이 주어진 경우에만 바인딩 추가
+            if (!empty($postStatus)) {
+                $stmt->bindValue('postStatus', $postStatus);
+            }
+            if (!empty($departmentName)) {
+                $stmt->bindValue('departmentName', $departmentName);
+            }
+
+
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return 0;
+        }
+    }
+
+
+    public function getMainPostsByAdmin(string $search, int $start, int $perPage, string $departmentName=null): array
     {
         try {
             $query = "select	
@@ -19,18 +116,31 @@ class Post extends BaseModel {
                                 u.userName,
                                 u.userEmail,
                                 u.userStatus,
-		                        (select count(*) from comments c where c.postIdx = p.postIdx and c.deleted_at is null) as comment_count,
-                                case when timestampdiff(minute, p.created_at, now()) <= 1440 then 1
-                                else 0 end as is_new
+                                d.departmentName,
+		                        (select count(*) from comments c where c.postIdx = p.postIdx and c.deleted_at is null) as comment_count
                                 from posts p
                                 join users u on p.userIdx = u.userIdx
-                                where p.title like :search and p.deleted_at is null
-                                order by p.postIdx desc limit :start, :perPage;";
+                                join departments d on u.departmentIdx = d.departmentIdx
+                                where p.title like :search
+                                  and p.postStatus = '승인'
+                                  and p.deleted_at is null";
+
+            if (!empty($departmentName)) {
+                $query .= " AND d.departmentName = :departmentName";
+            }
+
+            $query .= " order by p.postIdx desc limit :start, :perPage;";
 
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue('search', '%' . ($search ?? '') . '%');
             $stmt->bindParam('start', $start, PDO::PARAM_INT);
             $stmt->bindParam('perPage', $perPage, PDO::PARAM_INT);
+
+            // $postStatus 값이 주어진 경우에만 바인딩 추가
+            if (!empty($departmentName)) {
+                $stmt->bindValue('departmentName', $departmentName);
+            }
+
             $stmt->execute();
             return $stmt->fetchAll();
 
@@ -40,20 +150,123 @@ class Post extends BaseModel {
         }
     }
 
-    public function getMyPostsByPaging(int $userIdx, string $search, int $start, int $perPage): array
+    /**
+     * Post 목록의 개수(어드민 메인페이지)
+     * @param string $search
+     * @param string $departmentName
+     * @return int|mixed
+     */
+    public function countMainPostsByAdmin(string $search, string $departmentName): int
+    {
+        try {
+            $query = "SELECT count(p.postIdx) 
+                        FROM posts p 
+                        JOIN departments d ON u.departmentIdx = d.departmentIdx
+                        WHERE title like :search 
+                          and p.postStatus = '승인'
+                          and p.deleted_at is null";
+
+            // $postStatus 값이 주어진 경우에만 추가적인 필터링
+            if (!empty($departmentName)) {
+                $query .= " AND d.departmentName = :departmentName";
+            }
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+
+            // $postStatus 값이 주어진 경우에만 바인딩 추가
+            if (!empty($departmentName)) {
+                $stmt->bindValue('departmentName', $departmentName);
+            }
+
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return 0;
+        }
+    }
+
+
+    public function getMainPostsByCommon(string $search, int $userIdx, int $start, int $perPage): array
     {
         try {
             $query = "select	
                                 p.*,
                                 u.userName,
                                 u.userEmail,
+                                u.userStatus,
+                                d.departmentName,
+		                        (select count(*) from comments c where c.postIdx = p.postIdx and c.deleted_at is null) as comment_count
+                                from posts p
+                                join users u on p.userIdx = u.userIdx
+                                join departments d on u.departmentIdx = d.departmentIdx
+                                where 
+                                      p.title like :search and 
+                                      u.userIdx =:userIdx and
+                                      p.postStatus = '승인' and 
+                                      p.deleted_at is null
+                                order by p.postIdx desc limit :start, :perPage;";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+            $stmt->bindParam('start', $start, PDO::PARAM_INT);
+            $stmt->bindParam('perPage', $perPage, PDO::PARAM_INT);
+            $stmt->bindParam('userIdx', $userIdx, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Post 목록의 개수(일반 메인페이지)
+     * @param string $search
+     * @param int $userIdx
+     * @return int|mixed
+     */
+    public function countMainPostsByCommon(string $search, int $userIdx): int
+    {
+        try {
+            $query = "SELECT count(p.postIdx) 
+                        FROM posts p
+                        JOIN users u ON u.userIdx = p.userIdx
+                        WHERE title like :search 
+                          and u.userIdx = :userIdx
+                          and p.postStatus = '승인'
+                          and p.deleted_at is null";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+            $stmt->bindParam('userIdx', $userIdx, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return 0;
+        }
+    }
+
+
+
+
+    public function getMyPostsByMyPage(int $userIdx, string $search, int $start, int $perPage): array
+    {
+        try {
+            $query = "select	
+                                p.*,
+                                u.*,
 		                        (select count(*) from comments c where c.postIdx = p.postIdx) as comment_count,
                                 case when timestampdiff(minute, p.created_at, now()) <= 1440 then 1
                                 else 0 end as is_new
                                 from posts p
                                 join users u on p.userIdx = u.userIdx
                                 where u.userIdx = :userIdx and p.title like :search and p.deleted_at is null
-                                order by p.postIdx desc limit :start, :perPage;";
+                                order by
+                                     case when p.postStatus = '공지' then 0 else 1 end , p.postIdx desc 
+                                limit :start, :perPage;";
 
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam('userIdx', $userIdx, PDO::PARAM_INT);
@@ -69,10 +282,33 @@ class Post extends BaseModel {
         }
     }
 
-    public function getMyAllPosts(int $userIdx): array
+    /**
+     * Post 자신의 목록의 개수
+     * @param int $userIdx
+     * @param string $search
+     * @return int|mixed
+     */
+    public function countMine(int $userIdx, string $search): int
     {
         try {
-            $query = "select p.*
+            $query = "SELECT count(p.postIdx) FROM posts p WHERE title like :search and userIdx =:userIdx and p.deleted_at is null";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
+            $stmt->bindValue('userIdx', $userIdx);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return 0;
+        }
+    }
+
+
+    public function getMyAllPostsForDelete(int $userIdx): array
+    {
+        try {
+            $query = "select p.*,
+                             u.*
                         from posts p
                         join users u on p.userIdx = u.userIdx
                         where u.userIdx =:userIdx and p.deleted_at is null
@@ -91,6 +327,53 @@ class Post extends BaseModel {
 
 
     /**
+     * Post에서 공지 데이터 count 가져오기
+     * @return int|mixed
+     */
+    public function getNotifyAll(): array
+    {
+        try {
+            $query = "select p.*,
+                             u.*,
+                             d.departmentName,
+                             (select count(*) from comments c where c.postIdx = p.postIdx) as comment_count
+                        from posts p
+                        join users u on p.userIdx = u.userIdx
+                        join departments d on u.departmentIdx = d.departmentIdx
+                        where p.postStatus = '공지' and p.deleted_at is null
+                      ";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+
+
+    /**
+     * Post에서 공지 데이터 count 가져오기
+     * @return int|mixed
+     */
+    public function countNotifyAll(): int
+    {
+        try {
+            $query = "SELECT count(p.postIdx) FROM posts p WHERE p.postStatus = '공지' and p.deleted_at is null";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return 0;
+        }
+    }
+
+
+
+    /**
      * Post 데이터 가져오기
      * @param int $postIdx
      * @return array|mixed
@@ -100,7 +383,7 @@ class Post extends BaseModel {
         try {
             $query = "select
                                 p.*,
-                                u.userName
+                                u.*
                                 from posts p
                                 join users u on p.userIdx = u.userIdx
                                 where postIdx = :postIdx and p.deleted_at is null
@@ -121,17 +404,19 @@ class Post extends BaseModel {
      * @param int $userIdx
      * @param string $title
      * @param string $content
+     * @param string $commonOrNotifyRadio
      * @return array|mixed
      */
-    public function create(int $userIdx, string $title, string $content)
+    public function create(int $userIdx, string $title, string $content, string $commonOrNotifyRadio)
     {
         try {
-            $query = "INSERT INTO posts (userIdx, title,content) VALUES (:userIdx, :title, :content)";
+            $query = "INSERT INTO posts (userIdx, title, content, postStatus) VALUES (:userIdx, :title, :content, :postStatus)";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 'userIdx' => $userIdx,
                 'title' => $title,
-                'content' => $content
+                'content' => $content,
+                'postStatus' => $commonOrNotifyRadio
             ]);
             return $this->conn->lastInsertId();
         } catch (PDOException $e) {
@@ -161,6 +446,30 @@ class Post extends BaseModel {
             return false;
         }
     }
+
+
+    /**
+     * 게시글 데이터 수정하기
+     * 게시글 권한 수정
+     * @param $postStatus
+     * @param $postIdx
+     * @return array|mixed
+     */
+    public function updateStatus($postStatus, $postIdx)
+    {
+        try {
+            $query = "update posts set postStatus =:postStatus where postIdx =:postIdx ";
+            return $this->conn->prepare($query)->execute([
+                'postStatus' => $postStatus,
+                'postIdx' => $postIdx
+            ]);
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+
 
     /**
      * Post 삭제 (논리적!)
@@ -194,47 +503,6 @@ class Post extends BaseModel {
         } catch (PDOException $e) {
             error_log($e->getMessage());
             return false;
-        }
-    }
-
-
-    /**
-     * Post 목록의 개수
-     * @param string $search
-     * @return int|mixed
-     */
-    public function countAll(string $search): int
-    {
-        try {
-            $query = "SELECT count(p.postIdx) FROM posts p WHERE title like :search and p.deleted_at is null";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
-            $stmt->execute();
-            return $stmt->fetchColumn();
-        } catch (PDOException  $e) {
-            error_log($e->getMessage());
-            return 0;
-        }
-    }
-
-    /**
-     * Post 자신의 목록의 개수
-     * @param int $userIdx
-     * @param string $search
-     * @return int|mixed
-     */
-    public function countMine(int $userIdx, string $search): int
-    {
-        try {
-            $query = "SELECT count(p.postIdx) FROM posts p WHERE title like :search and userIdx =:userIdx and p.deleted_at is null";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindValue('search', '%' . ($search ?? '') . '%');
-            $stmt->bindValue('userIdx', $userIdx);
-            $stmt->execute();
-            return $stmt->fetchColumn();
-        } catch (PDOException  $e) {
-            error_log($e->getMessage());
-            return 0;
         }
     }
 

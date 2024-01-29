@@ -1,8 +1,11 @@
 <?php
 use Model\User;
+use Model\Post;
 use Model\Department;
+$post = new Post();
 $user = new User();
 $department = new Department();
+
 $departments = $department->getAllDepartments();
 $nowUser = $user->getUserById($_SESSION['userIdx']);
 if($nowUser['userStatus'] == "관리자") {

@@ -28,8 +28,10 @@ class Post
                 $createTableSQL = "CREATE TABLE $tableName ( 
             postIdx	INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             userIdx	INT	UNSIGNED,
+            postStatus  VARCHAR(10) DEFAULT '대기',
             title	VARCHAR(100)	NOT NULL,
             content	TEXT	NOT NULL,
+            views   INT UNSIGNED DEFAULT 0,
             created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             deleted_at DATETIME DEFAULT NULL
