@@ -65,6 +65,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
         document.getElementById("manageUserNav").classList.add("active");
     } else if (currentPath === '/mk-board/post/manage') {
         document.getElementById("managePostNav").classList.add("active");
+    } else if (currentPath === '/mk-board/log/manage') {
+        document.getElementById("manageLogNav").classList.add("active");
     }
 
 
@@ -792,4 +794,23 @@ document.addEventListener('DOMContentLoaded', function (event) {
             });
         });
     }
+
+
+    /**
+     * 로그페이지 detail 모달창 이벤트
+     * */
+    const openDetailModal = document.querySelectorAll('.openDetailModal');
+    if(openDetailModal) {
+        openDetailModal.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const details = this.closest('.logList').querySelector('.details').innerHTML;
+                console.log(details);
+                const detailModal = $('#detailModal');
+                detailModal.find('.details').text(details);
+                detailModal.modal('show');
+            })
+        })
+    }
+
+
 });

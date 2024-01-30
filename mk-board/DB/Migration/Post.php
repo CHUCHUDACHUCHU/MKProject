@@ -29,6 +29,7 @@ class Post
             postIdx	INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             userIdx	INT	UNSIGNED,
             postStatus  VARCHAR(10) DEFAULT '대기',
+            statusChangerIdx INT UNSIGNED DEFAULT NULL,
             title	VARCHAR(100)	NOT NULL,
             content	TEXT	NOT NULL,
             views   INT UNSIGNED DEFAULT 0,

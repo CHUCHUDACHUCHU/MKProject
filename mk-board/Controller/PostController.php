@@ -200,8 +200,8 @@ class PostController extends BaseController {
         $details = "original : " . $og . "\n" . "new : " . $new;
 
 
-        if($this->parametersCheck($postStatus, $postIdx)) {
-            if($this->post->updateStatus($postStatus, $postIdx)) {
+        if($this->parametersCheck($postStatus, $nowUser['userIdx'],  $postIdx)) {
+            if($this->post->updateStatus($postStatus, $nowUser['userIdx'], $postIdx)) {
                 //로깅
                 $this->assembleLogData( userIdx: $nowUser['userIdx'],
                                         userName: $nowUser['userName'],

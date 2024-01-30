@@ -7,6 +7,7 @@ use Route\UserRoute;
 use Route\PostRoute;
 use Route\CommentRoute;
 use Route\FileRoute;
+use Route\LogRoute;
 use Route\TestRoute;
 
 
@@ -24,6 +25,7 @@ $routes = [
     new PostRoute(),
     new CommentRoute(),
     new FileRoute(),
+    new LogRoute(),
     new TestRoute()
 ];
 

@@ -161,12 +161,15 @@ class UserController extends BaseController {
      */
     public function codeSend()
     {
+        /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userEmail = $requestData['email'];
         $result = [
             'status' => '',
             'message' => ''
         ];
+
+        $nowUser = $this->user->getUserByEmail($userEmail);
 
         // 새로운 인증번호 생성
         $verificationCode = rand(100000, 999999);
@@ -185,6 +188,14 @@ class UserController extends BaseController {
             // 세션에 새로운 인증번호와 현재 시간 저장
             $_SESSION['verification_code'] = $verificationCode;
             $_SESSION['verification_time'] = time();
+
+            //로깅
+            $this->assembleLogData( actionType: "GET",
+                userIdx: $nowUser['userIdx'],
+                userName: $nowUser['userName'],
+                targetIdx: $nowUser['userIdx'],
+                targetClass: get_class($this),
+                actionFunc: __METHOD__);
         } else {
             $result['message'] = '인증번호 전송에 실패하였습니다 : PHPMailer 오류';
         }

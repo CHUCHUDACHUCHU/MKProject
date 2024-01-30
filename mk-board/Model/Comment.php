@@ -98,7 +98,9 @@ class Comment extends BaseModel {
     public function getAllComments($postIdx): array
     {
         try {
-            $query = "SELECT c.*, u.userName, u.userEmail
+            $query = "SELECT    c.*,
+                                u.userName,
+                                u.userEmail
                         FROM comments c
                         JOIN users u ON c.userIdx = u.useridx
                         WHERE postIdx = :postIdx AND c.deleted_at is null

@@ -32,6 +32,7 @@ class CommentController extends BaseController{
         $content = $_POST['content'];
 
         $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $targetPost = $this->post->getPostById($postIdx);
 
         if ($this->parametersCheck($postIdx, $nowUser['userIdx'], $content)) {
             $commentIdx = $this->comment->create($postIdx, $nowUser['userIdx'], $content);
@@ -44,7 +45,27 @@ class CommentController extends BaseController{
                                         actionFunc: __METHOD__);
 
                 if(isset($_POST['reject'])) {
-                    $this->post->updateStatus('반려', $postIdx);
+                    $new = [
+                        'postStatus'=>'반려',
+                    ];
+                    $new = implode(',', $new);
+
+                    $og = [
+                        'postStatus'=>$targetPost['postStatus'],
+                    ];
+                    $og = implode(',', $og);
+
+                    $details = "original : " . $og . "\n" . "new : " . $new;
+                    //로깅
+                    $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                        userName: $nowUser['userName'],
+                        targetIdx: $postIdx,
+                        targetClass: 'Controller\PostController',
+                        actionFunc: 'Controller\PostController::updateStatus',
+                        updateStatus: '반려',
+                        details: $details);
+
+                    $this->post->updateStatus('반려', $nowUser['userIdx'], $postIdx);
                     $this->redirectBack('게시글 권한이 반려되었습니다.');
                 } else {
                     $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');

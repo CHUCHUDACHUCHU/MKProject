@@ -372,22 +372,27 @@ class Post extends BaseModel {
     }
 
 
-
     /**
      * Post 데이터 가져오기
      * @param int $postIdx
-     * @return array|mixed
+     * @return mixed
      */
-    public function getPostById(int $postIdx)
+    public function getPostById(int $postIdx): mixed
     {
         try {
-            $query = "select
+            $query = "SELECT
                                 p.*,
-                                u.*
-                                from posts p
-                                join users u on p.userIdx = u.userIdx
-                                where postIdx = :postIdx and p.deleted_at is null
-                                LIMIT 1";
+                                postUser.userName AS userName,
+                                postUser.userEmail AS userEmail,
+                                statusChanger.userName AS statusChangerName
+                        FROM
+                            posts p
+                        JOIN
+                            users postUser ON p.userIdx = postUser.userIdx
+                        LEFT JOIN
+                            users statusChanger ON p.statusChangerIdx = statusChanger.userIdx
+                        WHERE
+                            postIdx = :postIdx AND p.deleted_at IS NULL";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 'postIdx' => $postIdx
@@ -452,15 +457,17 @@ class Post extends BaseModel {
      * 게시글 데이터 수정하기
      * 게시글 권한 수정
      * @param $postStatus
+     * @param $statusChangerIdx
      * @param $postIdx
-     * @return array|mixed
+     * @return bool
      */
-    public function updateStatus($postStatus, $postIdx)
+    public function updateStatus($postStatus, $statusChangerIdx, $postIdx): bool
     {
         try {
-            $query = "update posts set postStatus =:postStatus where postIdx =:postIdx ";
+            $query = "update posts set postStatus =:postStatus, statusChangerIdx =:statusChangerIdx where postIdx =:postIdx ";
             return $this->conn->prepare($query)->execute([
                 'postStatus' => $postStatus,
+                'statusChangerIdx' => $statusChangerIdx,
                 'postIdx' => $postIdx
             ]);
         } catch (PDOException  $e) {

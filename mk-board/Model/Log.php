@@ -42,4 +42,20 @@ class Log extends BaseModel {
             return false;
         }
     }
+
+    public function getAllLog(): array
+    {
+        try {
+            $query = "SELECT l.*
+                        FROM logs l
+                        ORDER BY logIdx DESC
+                     ";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
 }

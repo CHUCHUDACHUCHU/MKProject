@@ -2,9 +2,11 @@
 use Model\User;
 use Model\Post;
 use Model\Department;
+use Model\Log;
 $post = new Post();
 $user = new User();
 $department = new Department();
+$log = new Log();
 
 $departments = $department->getAllDepartments();
 $nowUser = $user->getUserById($_SESSION['userIdx']);
@@ -12,6 +14,7 @@ if($nowUser['userStatus'] == "관리자") {
     $navbarItems = '<a class="nav-link" href="/mk-board/post/list" id="homeNav">Home</a>
                 <a class="nav-link" href="/mk-board/post/manage" id="managePostNav">게시글 관리</a>
                 <a class="nav-link" href="/mk-board/user/manage" id="manageUserNav">회원 관리</a>
+                <a class="nav-link" href="/mk-board/log/manage" id="manageLogNav">로그 관리</a>
                 <a class="nav-link" href="/mk-board/user/my-page" id="myPageNav">MyPage</a>
                 <a class="nav-link">👤 
                     <span style="font-weight: bold; color: black; font-size: 15px">'. $nowUser["userName"]. '님</span>

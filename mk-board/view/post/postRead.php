@@ -35,65 +35,71 @@ include __DIR__ . '/../part/nav.php';
         $postInfo = $post->getPostById($postIdx);
         $nowUser = $user->getUserById($_SESSION['userIdx']);
 
-
-        if($postInfo['postStatus'] === '대기') {
-            $standby = 'active';
-        } else if($postInfo['postStatus'] === '승인') {
-            $approval = 'active';
-        } else if($postInfo['postStatus'] === '반려') {
-            $refusal = 'active';
-        }
-
-        //1. 관리자
-        if($nowUser['userStatus'] === '관리자') {
-            // 1-1. 본인글 => 공지글~
-            if($_SESSION['userIdx'] == $postInfo['userIdx']) {
-                $fileDisplay = 'block';
-                $contentDisplay = 'block';
-                $updatePostDisplay = 'block';
-                $deletePostDisplay = 'block';
-                $commentCreateDisplay = 'block';
-
-                // 1-2. 다른 일반 글 => 상태관리 가능.
-            } else {
-                $fileDisplay = 'block';
-                $contentDisplay = 'block';
-                $changePostStatusDisplay = 'block';
-                $commentCreateDisplay = 'block';
-            }
-
-
-            //2. 일반
-        } else {
-            // 1. 내거 내가 볼 때,
-            if($_SESSION['userIdx'] == $postInfo['userIdx']) {
-                // 1-1. 승인
-                if($postInfo['postStatus'] === '승인') {
-                    $fileDisplay = 'block';
-                    $contentDisplay = 'block';
-                    $deletePostDisplay = 'block';
-                    $commentCreateDisplay = 'block';
-                    // 1-2. 대기/반려
-                } else {
-                    $refusalDisplay = 'block';
-                    $deletePostDisplay = 'block';
-                }
-                // 2. 내가 다른 사람 거 볼 때,
-            } else {
-                // 2-1. 공지글일 때,
-                if($postInfo['postStatus'] === '공지') {
-                    $fileDisplay = 'block';
-                    $contentDisplay = 'block';
-                    $commentCreateDisplay = 'block';
-                } else {
-                    header("Location: /mk-board");
-                    exit();
-                }
-            }
-        }
-
-
         if ($postInfo) {
+            if($postInfo['postStatus'] === '대기') {
+                $standby = 'active';
+            } else if($postInfo['postStatus'] === '승인') {
+                $approval = 'active';
+            } else if($postInfo['postStatus'] === '반려') {
+                $refusal = 'active';
+            }
+
+            //1. 관리자
+            if($nowUser['userStatus'] === '관리자') {
+                // 1-1. 본인글 => 공지글~
+                if($_SESSION['userIdx'] == $postInfo['userIdx']) {
+                    $fileDisplay = 'block';
+                    $contentDisplay = 'block';
+                    $updatePostDisplay = 'block';
+                    $deletePostDisplay = 'block';
+                    $commentCreateDisplay = 'block';
+
+                    // 1-2. 다른 일반 글 => 상태관리 가능.
+                } else {
+                    $fileDisplay = 'block';
+                    $contentDisplay = 'block';
+                    $changePostStatusDisplay = 'block';
+                    $commentCreateDisplay = 'block';
+                }
+
+
+                //2. 일반
+            } else {
+                // 1. 내거 내가 볼 때,
+                if($_SESSION['userIdx'] == $postInfo['userIdx']) {
+                    // 1-1. 승인
+                    if($postInfo['postStatus'] === '승인') {
+                        $fileDisplay = 'block';
+                        $contentDisplay = 'block';
+                        $deletePostDisplay = 'block';
+                        $commentCreateDisplay = 'block';
+                        // 1-2. 대기/반려
+                    } else {
+                        $refusalDisplay = 'block';
+                        $deletePostDisplay = 'block';
+                    }
+                    // 2. 내가 다른 사람 거 볼 때,
+                } else {
+                    // 2-1. 공지글일 때,
+                    if($postInfo['postStatus'] === '공지') {
+                        $fileDisplay = 'block';
+                        $contentDisplay = 'block';
+                        $commentCreateDisplay = 'block';
+                    } else {
+                        header("Location: /mk-board");
+                        exit();
+                    }
+                }
+            }
+
+            $postStatusColor = '#17a2b8';
+            if ($postInfo['postStatus'] === '대기') {
+                $postStatusColor = '#ff9800';
+            } else if($postInfo['postStatus'] === '반려') {
+                $postStatusColor = '#dc3545';
+            }
+
+
             $viewsBonus = 0;
             if (!isset($_COOKIE['post_views' . $postIdx])) {
                 $post->increaseViews($postIdx);
@@ -123,9 +129,24 @@ include __DIR__ . '/../part/nav.php';
                     </label>
                 </div>
             </div>
-
             <hr/>
-
+            <?php
+            if(isset($postInfo['statusChangerName'])) {
+                ?>
+                <div class="d-flex justify-content-end mt-1">
+                    <h5>
+                        <button type="button" class="btn btn-primary" style="color: black; font-weight: bolder">
+                            Operator: &nbsp <?= $postInfo['statusChangerName'] ?>
+                            <span class="badge badge-light" style="background-color: <?= $postStatusColor ?>!important;">
+                                <?=$postInfo['postStatus'] ?>
+                            </span>
+                            <span class="sr-only">unread messages</span>
+                        </button>
+                    </h5>
+                </div>
+                <?php
+            }
+            ?>
             <div class="card mb-3" style="background-color: oldlace;">
                 <div class="card-body" style="padding: 15px; padding-bottom: 0px">
                     <?php
@@ -214,7 +235,6 @@ include __DIR__ . '/../part/nav.php';
                     </div>
                 </div>
             </div>
-
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <a href="/mk-board/post/update?postIdx=<?= $postInfo['postIdx'] ?>" class="btn btn-primary mr-2" style="display: <?=$updatePostDisplay?>">수정하기</a>
                 <form action="/mk-board/post/delete" method="post" class="mr-2 deletePostBtn">
