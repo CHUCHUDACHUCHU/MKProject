@@ -405,9 +405,9 @@ class Post extends BaseModel {
      * @param string $title
      * @param string $content
      * @param string $commonOrNotifyRadio
-     * @return array|mixed
+     * @return bool|string
      */
-    public function create(int $userIdx, string $title, string $content, string $commonOrNotifyRadio)
+    public function create(int $userIdx, string $title, string $content, string $commonOrNotifyRadio): bool|string
     {
         try {
             $query = "INSERT INTO posts (userIdx, title, content, postStatus) VALUES (:userIdx, :title, :content, :postStatus)";

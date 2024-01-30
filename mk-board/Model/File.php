@@ -68,9 +68,9 @@ class File extends BaseModel {
      * 파일과 게시글 연결하기
      * @param $postIdx
      * @param $fileIdx
-     * @return array|mixed
+     * @return bool
      */
-    public function updatePostIdx($postIdx, $fileIdx)
+    public function connectFileWithPost($postIdx, $fileIdx): bool
     {
         try {
             $query = "update files set postIdx =:postIdx  where fileIdx =:fileIdx";

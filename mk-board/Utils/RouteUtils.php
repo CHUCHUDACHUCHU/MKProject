@@ -2,11 +2,14 @@
 
 namespace Utils;
 
+use JetBrains\PhpStorm\Pure;
+use Model\Log;
+
 trait RouteUtils{
     // URL 요청이 해당 경로와 메소드와 일치하는지 확인
-    public function routeCheck($origin, $path, $method): bool
+    #[Pure] public function routeCheck($origin, $path, $method): bool
     {
-        return strpos($origin, $path) !== false
+        return str_contains($origin, $path)
             && $_SERVER['REQUEST_METHOD'] == $method;
     }
 

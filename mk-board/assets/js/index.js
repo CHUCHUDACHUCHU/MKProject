@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                 },
                 body: JSON.stringify({
                     commentIdx: commentIdx,
-                    content, content
+                    content: content
                 }),
             })
                 .then((res) => {
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                 })
                 .then((data) => {
                     if (data.result.status === 'success') {
-                        location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
+                        location.reload();
                     } else {
                         alert(data.result.message);
                     }
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                         })
                         .then((data) => {
                             if (data.result.status === 'success') {
-                                location.href = '/mk-board/post/read?postIdx=' + data.result.postIdx;
+                                location.reload();
                             } else {
                                 alert(data.result.message);
                             }

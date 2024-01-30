@@ -204,7 +204,7 @@ include __DIR__ . '/../part/head.php';
             .then((data) => {
                 if(data.result.status === 'success') {
                     console.log('게시글 DB저장 성공!');
-                    fileUpdatePostIdx(data.result.postIdx);
+                    connectFileWithPost(data.result.postIdx);
                 } else {
                     alert(data.result.message);
                 }
@@ -214,8 +214,8 @@ include __DIR__ . '/../part/head.php';
             })
     }
 
-    function fileUpdatePostIdx(postIdx) {
-        fetch('/mk-board/file/update/postIdx', {
+    function connectFileWithPost(postIdx) {
+        fetch('/mk-board/file/connect', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

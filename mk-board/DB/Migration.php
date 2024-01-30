@@ -5,6 +5,7 @@ use Migration\Department;
 use Migration\Post;
 use Migration\User;
 use Migration\File;
+use Migration\Log;
 
 require_once '../vendor/autoload.php';
 
@@ -20,6 +21,7 @@ class Migration
         $this->comment = new Comment();
         $this->department = new Department();
         $this->file = new File();
+        $this->log = new Log();
 
         echo "[Migration Start]\n";
         $this->user->migrate();
@@ -27,6 +29,7 @@ class Migration
         $this->comment->migrate();
         $this->department->migrate();
         $this->file->migrate();
+        $this->log->migrate();
         echo "[Migration End]\n";
     }
 }

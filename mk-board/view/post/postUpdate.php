@@ -209,7 +209,7 @@ include __DIR__ . '/../part/nav.php';
             .then((data) => {
                 if(data.result.status === 'success') {
                     console.log('게시글 DB 수정 성공!');
-                    fileUpdatePostIdx(postIdx);
+                    connectFileWithPost(postIdx);
                 } else {
                     alert(data.result.message);
                 }
@@ -219,8 +219,8 @@ include __DIR__ . '/../part/nav.php';
             })
     }
 
-    function fileUpdatePostIdx(postIdx) {
-        fetch('/mk-board/file/update/postIdx', {
+    function connectFileWithPost(postIdx) {
+        fetch('/mk-board/file/connect', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -248,7 +248,8 @@ include __DIR__ . '/../part/nav.php';
     const deleteFileBtn = document.querySelectorAll('.deleteFileBtn');
     if(deleteFileBtn) {
         deleteFileBtn.forEach(function (item) {
-            item.addEventListener('click', function () {
+            item.addEventListener('click', function (event) {
+                event.preventDefault();
                 const fileIdx = this.closest('.d-flex').querySelector('.uploaded-file-info-box').dataset.fileIdx;
                 console.log('File Index:', fileIdx);
 

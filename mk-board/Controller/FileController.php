@@ -1,9 +1,11 @@
 <?php
 namespace Controller;
+use JetBrains\PhpStorm\NoReturn;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Model\File;
 
+use Model\File;
+use Model\User;
 /**
  * FileController
  * Route에서 컨트롤러 사용.
@@ -12,12 +14,14 @@ use Model\File;
 
 class FileController extends BaseController
 {
-    private $adapter;
-    private $file;
+    private LocalFilesystemAdapter $adapter;
+    private File $file;
+    private User $user;
     public function __construct()
     {
         $this->adapter = new LocalFilesystemAdapter('/var/www/html/mk-board/assets/uploads');
         $this->file = new File();
+        $this->user = new User();
     }
 
     public function create() {
@@ -72,7 +76,8 @@ class FileController extends BaseController
         }
     }
 
-    public function updatePostIdx() {
+    public function connectFileWithPost() {
+        /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
         $uploadedFileIndexes = $requestData['uploadedFileIndexes'];
         $uploadedFileIndexes = array_map('intval', $uploadedFileIndexes);
@@ -82,10 +87,20 @@ class FileController extends BaseController
             'status' => '',
             'message' => ''
         ];
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
 
         $completes = count($uploadedFileIndexes);
         foreach ($uploadedFileIndexes as $fileIdx) {
-            if ($this->file->updatePostIdx($postIdx, $fileIdx)) {
+            if ($this->file->connectFileWithPost($postIdx, $fileIdx)) {
+                $details = "(fileIdx : " . $fileIdx . ") is connected on (postIdx : " . $postIdx . ")";
+                //로깅
+                $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                        userName: $nowUser['userName'],
+                                        targetIdx: $fileIdx,
+                                        targetClass: get_class($this),
+                                        actionFunc: __METHOD__,
+                                        details: $details);
+
                 $completes--;
             }
         }
@@ -104,16 +119,26 @@ class FileController extends BaseController
     /**
      * 파일 다운로드
      */
-    public function download() {
+    #[NoReturn] public function download() {
+        /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
         $fileIdx = $requestData['fileIdx'];
-        $file = $this->file->getFileById($fileIdx);
 
-        if ($file) {
+        $targetFile = $this->file->getFileById($fileIdx);
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+
+        if ($targetFile) {
+            //로깅
+            $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                userName: $nowUser['userName'],
+                targetIdx: $fileIdx,
+                targetClass: get_class($this),
+                actionFunc: __METHOD__);
+
             $result = [
                 'status' => 'success',
                 'message' => '파일 정보를 가져올 수 없습니다.',
-                'fileName' => $file['fileName']
+                'fileName' => $targetFile['fileName']
             ];
         } else {
             $result = [
@@ -140,8 +165,17 @@ class FileController extends BaseController
             'message' => ''
         ];
 
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+
         if($this->parametersCheck($fileIdx)) {
                 if($this->file->delete($fileIdx)) {
+                    //로깅
+                    $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                        userName: $nowUser['userName'],
+                        targetIdx: $fileIdx,
+                        targetClass: get_class($this),
+                        actionFunc: __METHOD__);
+
                     $result['status'] = 'success';
                     $result['message'] = '파일이 삭제되었습니다.';
                 } else {

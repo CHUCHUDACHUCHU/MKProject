@@ -8,16 +8,14 @@ class FileRoute extends BaseRoute {
     {
         $FileController = new FileController();
 
-        if($this->routeCheck($url, "file/list", "GET")) {
-            return $this->requireView('test', 'session');
-        } else if($this->routeCheck($url, "file/upload", "POST")) {
+        if($this->routeCheck($url, "file/upload", "POST")) {
             $FileController->fileUpload();
             return true;
         } else if($this->routeCheck($url, "file/create", "POST")) {
             $FileController->create();
             return true;
-        } else if($this->routeCheck($url, "file/update/postIdx", "POST")) {
-            $FileController->updatePostIdx();
+        } else if($this->routeCheck($url, "file/connect", "POST")) {
+            $FileController->connectFileWithPost();
             return true;
         } else if($this->routeCheck($url, "file/download", "POST")) {
             $FileController->download();

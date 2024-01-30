@@ -302,7 +302,6 @@ include __DIR__ . '/../part/nav.php';
                 <form action="/mk-board/comment/create" method="post">
                     <div class="form-group">
                         <input type="hidden" name="postIdx" id="postIdx" value="<?= $postInfo['postIdx'] ?>">
-                        <input type="hidden" name="userIdx" id="userIdx" value="<?= $_SESSION['userIdx'] ?>">
                         <textarea name="content" class="form-control" id="content" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">댓글 작성</button>

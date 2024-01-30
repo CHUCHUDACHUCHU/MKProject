@@ -1,6 +1,7 @@
 <?php
 namespace Utils;
 
+use Model\Log;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
@@ -33,7 +34,7 @@ trait ControllerUtils   {
      * @param $message string 메시지
      * @return void
      */
-    public function redirectBack($message)
+    public function redirectBack(string $message)
     {
         echo "<script>
                 alert('$message');
@@ -69,8 +70,11 @@ trait ControllerUtils   {
 
     /**
      * 파일 용량 format
+     * @param $bytes
+     * @return string
      */
-    public function formatSizeUnits($bytes) {
+    public function formatSizeUnits($bytes): string
+    {
         $units = array('B', 'KB', 'MB', 'GB', 'TB');
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
@@ -113,5 +117,20 @@ trait ControllerUtils   {
         $mail->Subject = $subject;
         $mail->Body = $body;
         return $mail->send() ? "success" : "fail";
+    }
+
+    public function assembleLogData(
+        string $actionType = "POST",
+        int $userIdx = null,
+        string $userName = null,
+        int $targetIdx = null,
+        string $targetClass = null,
+        string $actionFunc = null,
+        string $updateStatus = null,
+        string $details = null
+    )
+    {
+        $log = new Log();
+        $log->create($actionType, $userIdx, $userName, $targetIdx, substr($targetClass, 11), explode('::', $actionFunc)[1], $updateStatus, $details);
     }
 }

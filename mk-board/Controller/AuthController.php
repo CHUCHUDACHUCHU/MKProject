@@ -9,7 +9,7 @@ use Model\User;
  */
 
 class AuthController extends BaseController{
-    private $user;
+    private User $user;
 
     public function __construct() {
         $this->user = new User();
@@ -21,6 +21,7 @@ class AuthController extends BaseController{
      * 이후 홈화면으로 이동
      */
     public function login() {
+        /* body 값 */
         $userEmail = $_POST['userEmail'];
         $userPw = $_POST['userPw'];
 
@@ -32,9 +33,16 @@ class AuthController extends BaseController{
 
             if($rst) {
                 if($rst['userPw'] == $hashPw) {
-                    // 비밀번호가 일치합니다. 세션을 저장한 후 이동합니다.
+                    // 비밀번호가 일치합니다. 세션을 저장하면 로그인 성공!
                     $_SESSION['userIdx'] = $rst['userIdx'];
                     $_SESSION['userInit'] = $rst['userInit'];
+
+                    // 로깅
+                    $this->assembleLogData( userIdx: $rst['userIdx'],
+                                            userName: $rst['userName'],
+                                            targetClass: get_class($this),
+                                            actionFunc: __METHOD__);
+
                     if($_SESSION['userInit'] === 0) {
                         $this->redirect('/mk-board/user/my-page', '첫 로그인 시 비밀번호 변경이 필요합니다!');
                     } else {
@@ -57,6 +65,14 @@ class AuthController extends BaseController{
      * 세션정보만 날려주기.
      */
     public function logout() {
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        // 로깅
+        $this->assembleLogData( actionType: "GET",
+                                userIdx: $_SESSION['userIdx'],
+                                userName: $nowUser['userName'],
+                                targetClass: get_class($this),
+                                actionFunc: __METHOD__);
+
         session_unset();
         $this->redirect('/mk-board/auth/login', '');
     }
@@ -66,6 +82,14 @@ class AuthController extends BaseController{
      * 세션정보와 쿠키값 날려주기.
      */
     public function sessionout() {
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        // 로깅
+        $this->assembleLogData( actionType: "GET",
+                                userIdx: $_SESSION['userIdx'],
+                                userName: $nowUser['userName'],
+                                targetClass: get_class($this),
+                                actionFunc: __METHOD__);
+
         session_unset();
         setcookie(session_name(), '', time() - 3600, '/');
         $this->redirect('/mk-board/auth/login', '세션이 만료되었습니다!');

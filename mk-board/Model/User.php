@@ -61,14 +61,16 @@ class User extends BaseModel {
      * @param $departmentIdx
      * @param $userPhone
      * @param $userStatus
-     * @return array|mixed
+     * @return bool|string
      */
-    public function create($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus)
+    public function create($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus): bool|string
     {
         try {
             $query = "INSERT INTO users (userName, userEmail, userPw, departmentIdx, userPhone, userStatus) 
                                     VALUES (:userName, :userEmail, :userPw, :departmentIdx, :userPhone, :userStatus)";
-            return $stmt = $this->conn->prepare($query)->execute([
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
                 'userName' => $userName,
                 'userEmail' => $userEmail,
                 'userPw' => $userPw,
@@ -76,6 +78,7 @@ class User extends BaseModel {
                 'userPhone' => $userPhone,
                 'userStatus' => $userStatus
             ]);
+            return $this->conn->lastInsertId();
         } catch (PDOException  $e) {
             error_log($e->getMessage());
             return false;
@@ -89,9 +92,9 @@ class User extends BaseModel {
      * @param $departmentIdx
      * @param $userPhone
      * @param $userIdx
-     * @return array|mixed
+     * @return bool
      */
-    public function updateAll($userName, $departmentIdx, $userPhone, $userIdx)
+    public function updateMyInfo($userName, $departmentIdx, $userPhone, $userIdx): bool
     {
         try {
             $query = "update users set userName =:userName, departmentIdx =:departmentIdx, userPhone =:userPhone where userIdx =:userIdx ";
@@ -155,9 +158,9 @@ class User extends BaseModel {
      * @param $userIdx
      * @param $changePassword
      * @param $userInit
-     * @return array|mixed
+     * @return bool
      */
-    public function updatePassword($userIdx, $changePassword, $userInit)
+    public function updatePassword($userIdx, $changePassword, $userInit): bool
     {
         try {
             if($userInit === 0) {

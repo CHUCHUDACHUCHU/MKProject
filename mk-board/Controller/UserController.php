@@ -55,8 +55,7 @@ class UserController extends BaseController {
     }
 
     public function create() {
-        //HTML 폼으로 부터 왔기 때문에 이렇게 받을 수 있음
-
+        /* body 값 */
         $userName = $_POST['userName'];
         $userEmail = $_POST['userEmail'];
         $departmentIdx = $_POST['departmentIdx'];
@@ -66,11 +65,14 @@ class UserController extends BaseController {
         $salt = '$5$QOPrAVIK$';
         $userPw = crypt('MKboard1234', $salt);
 
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+
         if($this->user->getUserByEmail($userEmail)) {
             $this->redirectBack('가입된 이메일이 존재합니다.');
         }else {
             if($this->parametersCheck($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus)) {
-                if($this->user->create($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus)) {
+                $userIdx = $this->user->create($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus);
+                if($userIdx) {
                     $mailSubject = "MKBoard 사용자 생성이 완료되었습니다. $userName 님";
                     $mailBody = "
                                 <b>사용자 이메일: $userEmail</b><br/>
@@ -85,6 +87,13 @@ class UserController extends BaseController {
                     if($result === 'fail') {
                         $this->redirectBack('회원생성 이메일이 보내지지 않았습니다. 이메일을 수동으로 보내주세요.');
                     }
+                    //로깅
+                    $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                            userName: $nowUser['userName'],
+                                            targetIdx: $userIdx,
+                                            targetClass: get_class($this),
+                                            actionFunc: __METHOD__);
+
                     $this->redirect('mk-board/user/manage', '회원이 생성되었습니다.');
                 } else {
                     $this->redirectBack('DB 생성에 실패했습니다.');
@@ -96,18 +105,43 @@ class UserController extends BaseController {
     }
 
 
-    public function updateAll() {
+    public function updateMyInfo() {
+        /* body 값 */
         $userName = $_POST['userName'];
         $departmentIdx = $_POST['departmentIdx'];
         $userPhone = $_POST['userPhone'];
-        $userIdx = $_SESSION['userIdx'];
+
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $new = [
+            'userName'=>$userName,
+            'departmentIdx'=>$departmentIdx,
+            'userPhone'=>$userPhone,
+        ];
+        $new = implode(',', $new);
+
+        $og = [
+            'userName'=>$nowUser['userName'],
+            'departmentIdx'=>$nowUser['departmentIdx'],
+            'userPhone'=>$nowUser['userPhone'],
+        ];
+        $og = implode(',', $og);
+
+        $details = "original : " . $og . "\n" . "new : " . $new;
+
 
         if($this->parametersCheck($userName, $departmentIdx, $userPhone)) {
             $userNamePattern = '/^[A-Za-z가-힣]{1,10}$/';
             $userPhonePattern = '/^010-\d{4}-\d{4}$/';
 
             if(preg_match($userNamePattern, $userName) && preg_match($userPhonePattern, $userPhone)) {
-                if($this->user->updateAll($userName, $departmentIdx, $userPhone, $userIdx)) {
+                if($this->user->updateMyInfo($userName, $departmentIdx, $userPhone, $nowUser['userIdx'])) {
+                    //로깅
+                    $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                            userName: $nowUser['userName'],
+                                            targetClass: get_class($this),
+                                            actionFunc: __METHOD__,
+                                            details: $details);
+
                     $this->redirect('/mk-board/user/my-page', '사용자 정보가 수정되었습니다.');
                 } else {
                     $this->redirectBack('DB 변경에 실패하였습니다.');
@@ -196,20 +230,41 @@ class UserController extends BaseController {
      * 이메일 수정 요청
      */
     public function updateEmail() {
+        /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
         $changeEmail = $requestData['changeEmail'];
-        $userIdx = $_SESSION['userIdx'];
+
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
         $result = [
             'status' => '',
             'message' => ''
         ];
 
+        $new = [
+            'userEmail'=>$changeEmail
+        ];
+        $new = implode(',', $new);
+
+        $og = [
+            'userEmail'=>$nowUser['userEmail']
+        ];
+        $og = implode(',', $og);
+
+        $details = "original : " . $og . "\n" . "new : " . $new;
+
 
         if($this->user->getUserByEmail($changeEmail)) {
             $result['status'] = 'fail';
             $result['message'] = '해당 이메일로 이미 가입된 사용자가 존재합니다.';
-        } else if($this->parametersCheck($changeEmail, $userIdx)) {
-            if($this->user->updateEmail($changeEmail, $userIdx)) {
+        } else if($this->parametersCheck($changeEmail, $nowUser['userIdx'])) {
+            if($this->user->updateEmail($changeEmail, $nowUser['userIdx'])) {
+                //로깅
+                $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                        userName: $nowUser['userName'],
+                                        targetClass: get_class($this),
+                                        actionFunc: __METHOD__,
+                                        details: $details);
+
                 $result['status'] = 'success';
                 $result['message'] = '이메일 변경에 성공하였습니다.';
             } else {
@@ -224,19 +279,26 @@ class UserController extends BaseController {
     }
 
     public function updatePassword() {
-        $userIdx = $_SESSION['userIdx'];
-        $userInit = $_SESSION['userInit'];
-        $targetUser = $this->user->getUserById($userIdx);
+        /* body 값 */
         $nowPassword = $_POST['nowPassword'];
         $changePassword = $_POST['changePassword'];
+
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $userInit = $_SESSION['userInit'];
 
         $salt = '$5$QOPrAVIK$';
         $nowPassword = crypt($nowPassword, $salt);
         $changePassword = crypt($changePassword, $salt);
 
         if($this->parametersCheck($nowPassword, $changePassword)) {
-            if($targetUser['userPw'] === $nowPassword) {
-                if($this->user->updatePassword($userIdx, $changePassword, $userInit)) {
+            if($nowUser['userPw'] === $nowPassword) {
+                if($this->user->updatePassword($nowUser['userIdx'], $changePassword, $userInit)) {
+                    //로깅
+                    $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                        userName: $nowUser['userName'],
+                        targetClass: get_class($this),
+                        actionFunc: __METHOD__);
+
                     $this->redirect('/mk-board/auth/logout', '비밀번호 변경 성공!, 다시 로그인해주세요!');
                 } else {
                     $this->redirectBack('DB 변경에 실패하였습니다.');
@@ -253,6 +315,7 @@ class UserController extends BaseController {
      * 회원 권한 변경 요청
      */
     public function updateStatus() {
+        /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userStatus = $requestData['userStatus'];
         $userEmail = $requestData['userEmail'];
@@ -261,9 +324,32 @@ class UserController extends BaseController {
             'message' => ''
         ];
 
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $targetUser = $this->user->getUserByEmail($userEmail);
+        $new = [
+            'userStatus'=>$userStatus,
+        ];
+        $new = implode(',', $new);
+
+        $og = [
+            'userStatus'=>$targetUser['userStatus'],
+        ];
+        $og = implode(',', $og);
+
+        $details = "original : " . $og . "\n" . "new : " . $new;
+
 
         if($this->parametersCheck($userStatus, $userEmail)) {
             if($this->user->updateStatus($userStatus, $userEmail)) {
+                //로깅
+                $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                        userName: $nowUser['userName'],
+                                        targetIdx: $targetUser['userIdx'],
+                                        targetClass: get_class($this),
+                                        actionFunc: __METHOD__,
+                                        updateStatus: $userStatus,
+                                        details: $details);
+
                 $result['status'] = 'success';
                 $result['message'] = '회원 권한 변경에 성공하였습니다.';
             } else {
@@ -281,23 +367,34 @@ class UserController extends BaseController {
      * User 삭제하기 (논리적!)
      */
     public function delete() {
+        /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userEmail = $requestData['userEmail'];
-        $userIdx = $this->user->getUserByEmail($userEmail)['userIdx'];
-        $posts = $this->post->getMyAllPostsForDelete($userIdx);
+
+        $targetUser = $this->user->getUserByEmail($userEmail);
+        $posts = $this->post->getMyAllPostsForDelete($targetUser['userIdx']);
         $result = [
             'status' => '',
             'message' => ''
         ];
 
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+
         if ($this->parametersCheck($userEmail)) {
             if ($this->user->delete($userEmail)) {
+                // 각각의 게시글에 대한 댓글 삭제
                 foreach ($posts as $item) {
                     $this->comment->deleteCommentsByPost($item['postIdx']);
                     $this->file->deleteFilesByPost($item['postIdx']);
                 }
-                $this->post->deletePostsByUser($userIdx);
-                // 각각의 게시글에 대한 댓글 삭제
+                $this->post->deletePostsByUser($targetUser['userIdx']);
+                //로깅
+                $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                    userName: $nowUser['userName'],
+                    targetIdx: $targetUser['userIdx'],
+                    targetClass: get_class($this),
+                    actionFunc: __METHOD__);
+
                 $result['status'] = 'success';
                 $result['message'] = '회원 삭제에 성공하였습니다.';
             } else {
@@ -316,15 +413,18 @@ class UserController extends BaseController {
      * @important 이 메소드는 json 리턴입니다.
      */
     public function resetPassword() {
+        /* body 값*/
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userEmail = $requestData['userEmail'];
+
+        $salt = '$5$QOPrAVIK$';
+        $changePassword = crypt('MKboard1234', $salt);
+
         $result = [
             'status' => '',
             'message' => ''
         ];
-
-        $salt = '$5$QOPrAVIK$';
-        $changePassword = crypt('MKboard1234', $salt);
+        $nowUser = $this->user->getUserByEmail($userEmail);
 
         if($this->parametersCheck($userEmail, $changePassword)) {
             if($this->user->resetPassword($userEmail, $changePassword)) {
@@ -339,6 +439,12 @@ class UserController extends BaseController {
                                 본 메일은 MK-Board에서 발송된 것입니다.
                             ";
                 if($this->sendEmail($userEmail, $mailSubject, $mailBody)) {
+                    //로깅
+                    $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                        userName: $nowUser['userName'],
+                        targetClass: get_class($this),
+                        actionFunc: __METHOD__);
+
                     $result['status'] = 'success';
                     $result['message'] = '비밀번호 초기화에 성공하였습니다. 이메일을 확인해주세요.';
                 } else {

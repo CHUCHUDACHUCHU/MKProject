@@ -2,6 +2,7 @@
 namespace Controller;
 use Model\Comment;
 use Model\Post;
+use Model\User;
 
 /**
  * CommentCotroller
@@ -10,12 +11,14 @@ use Model\Post;
  */
 
 class CommentController extends BaseController{
-    private $comment;
-    private $post;
+    private Comment $comment;
+    private Post $post;
+    private User $user;
 
     public function __construct() {
         $this->comment = new Comment();
         $this->post = new Post();
+        $this->user = new User();
     }
 
     /**
@@ -24,11 +27,22 @@ class CommentController extends BaseController{
      */
     public function create()
     {
+        /* body 값 */
         $postIdx = $_POST['postIdx'];
-        $userIdx = $_POST['userIdx'];
         $content = $_POST['content'];
-        if ($this->parametersCheck($postIdx, $userIdx, $content)) {
-            if ($this->comment->create($postIdx, $userIdx, $content)) {
+
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+
+        if ($this->parametersCheck($postIdx, $nowUser['userIdx'], $content)) {
+            $commentIdx = $this->comment->create($postIdx, $nowUser['userIdx'], $content);
+            if ($commentIdx) {
+                //로깅
+                $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                        userName: $nowUser['userName'],
+                                        targetIdx: $commentIdx,
+                                        targetClass: get_class($this),
+                                        actionFunc: __METHOD__);
+
                 if(isset($_POST['reject'])) {
                     $this->post->updateStatus('반려', $postIdx);
                     $this->redirectBack('게시글 권한이 반려되었습니다.');
@@ -47,34 +61,54 @@ class CommentController extends BaseController{
      * 댓글 수정 기능을 담당
      * @return void
      */
-    public function update() {
+    public function update()
+    {
+        /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
         $commentIdx = $requestData['commentIdx'];
         $content = $requestData['content'];
 
-        $targetComment = $this->comment->getCommentById($commentIdx);
-
         $result = [
             'status' => '',
             'message' => '',
-            'postIdx' => $targetComment['postIdx']
         ];
-        if($targetComment['userIdx'] !== $_SESSION['userIdx']) {
-            $result['status'] = 'fail';
-            $result['message'] = '댓글 수정 권한이 없습니다.';
-        } else {
-            if($this->parametersCheck($commentIdx, $content)) {
-                if($this->comment->update($commentIdx, $content)) {
-                    $result['status'] = 'success';
-                    $result['message'] = '댓글 수정에 성공하였습니다.';
-                } else {
-                    $result['status'] = 'fail';
-                    $result['message'] = 'DB 변경에 실패하였습니다.';
-                }
+
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $targetComment = $this->comment->getCommentById($commentIdx);
+
+        $new = [
+            'commentContent' => $content
+        ];
+        $new = implode(',', $new);
+
+        $og = [
+            'commentContent' => $targetComment['content']
+        ];
+        $og = implode(',', $og);
+
+        $details = "original : " . $og . "\n" . "new : " . $new;
+
+
+
+        if ($this->parametersCheck($commentIdx, $content)) {
+            if ($this->comment->update($commentIdx, $content)) {
+                //로깅
+                $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                        userName: $nowUser['userName'],
+                                        targetIdx: $commentIdx,
+                                        targetClass: get_class($this),
+                                        actionFunc: __METHOD__,
+                                        details: $details);
+
+                $result['status'] = 'success';
+                $result['message'] = '댓글 수정에 성공하였습니다.';
             } else {
                 $result['status'] = 'fail';
-                $result['message'] = '입력되지 않은 값이 있습니다.';
+                $result['message'] = 'DB 변경에 실패하였습니다.';
             }
+        } else {
+            $result['status'] = 'fail';
+            $result['message'] = '입력되지 않은 값이 있습니다.';
         }
         $this->echoJson(['result' => $result]);
     }
@@ -85,32 +119,35 @@ class CommentController extends BaseController{
      * @return void
      */
     public function delete() {
+        /* body 값*/
         $requestData = json_decode(file_get_contents("php://input"), true);
         $commentIdx = $requestData['commentIdx'];
-
-        $targetComment = $this->comment->getCommentById($commentIdx);
 
         $result = [
             'status' => '',
             'message' => '',
-            'postIdx' => $targetComment['postIdx']
         ];
-        if($targetComment['userIdx'] !== $_SESSION['userIdx']) {
-            $result['status'] = 'fail';
-            $result['message'] = '댓글 삭제 권한이 없습니다.';
-        } else {
-            if($this->parametersCheck($commentIdx)) {
-                if($this->comment->delete($commentIdx)) {
-                    $result['status'] = 'success';
-                    $result['message'] = '댓글이 삭제되었습니다.';
-                } else {
-                    $result['status'] = 'fail';
-                    $result['message'] = 'DB 변경에 실패하였습니다.';
-                }
+
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+
+        if($this->parametersCheck($commentIdx)) {
+            if($this->comment->delete($commentIdx)) {
+                //로깅
+                $this->assembleLogData( userIdx: $nowUser['userIdx'],
+                                        userName: $nowUser['userName'],
+                                        targetIdx: $commentIdx,
+                                        targetClass: get_class($this),
+                                        actionFunc: __METHOD__);
+
+                $result['status'] = 'success';
+                $result['message'] = '댓글이 삭제되었습니다.';
             } else {
                 $result['status'] = 'fail';
-                $result['message'] = '입력되지 않은 값이 있습니다.';
+                $result['message'] = 'DB 변경에 실패하였습니다.';
             }
+        } else {
+            $result['status'] = 'fail';
+            $result['message'] = '입력되지 않은 값이 있습니다.';
         }
         $this->echoJson(['result' => $result]);
     }

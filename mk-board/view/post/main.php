@@ -143,7 +143,6 @@ include __DIR__ . '/../part/head.php';
                 //실제 게시글 조회!!!
                 if ($posts) {
                     foreach ($posts as $postInfo) {
-
                         $postStatusColor = '#17a2b8';
                         $tableColor = '#fff';
                         $lockEmoji = '';

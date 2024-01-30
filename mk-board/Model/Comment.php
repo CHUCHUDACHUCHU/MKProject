@@ -15,17 +15,19 @@ class Comment extends BaseModel {
      * @param $postIdx
      * @param $userIdx
      * @param $content
-     * @return bool
+     * @return bool|string
      */
-    public function create($postIdx, $userIdx, $content): bool
+    public function create($postIdx, $userIdx, $content): bool|string
     {
         try {
             $query = "INSERT INTO comments (postIdx, userIdx, content) VALUES (:postIdx, :userIdx, :content)";
-            return $this->conn->prepare($query)->execute([
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
                 'postIdx' => $postIdx,
                 'userIdx' => $userIdx,
                 'content' => $content
             ]);
+            return $this->conn->lastInsertId();
         } catch (PDOException  $e) {
             error_log($e->getMessage());
             return false;
