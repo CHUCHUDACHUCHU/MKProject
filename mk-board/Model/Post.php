@@ -327,8 +327,8 @@ class Post extends BaseModel {
 
 
     /**
-     * Post에서 공지 데이터 count 가져오기
-     * @return int|mixed
+     * Post에서 공지 데이터 가져오기
+     * @return array
      */
     public function getNotifyAll(): array
     {
@@ -340,7 +340,8 @@ class Post extends BaseModel {
                         from posts p
                         join users u on p.userIdx = u.userIdx
                         join departments d on u.departmentIdx = d.departmentIdx
-                        where p.postStatus = '공지' and p.deleted_at is null
+                        where p.postStatus = '공지' and p.deleted_at is null  
+                        order by postIdx desc
                       ";
 
             $stmt = $this->conn->prepare($query);
