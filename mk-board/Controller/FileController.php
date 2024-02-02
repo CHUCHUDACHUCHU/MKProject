@@ -132,25 +132,27 @@ class FileController extends BaseController
         $nowUser = $this->user->getUserById($_SESSION['userIdx']);
         $details = "(fileIdx : " . $fileIdx . ") is connected on (postIdx : " . $targetFilePostIdx . ")";
 
-        if ($this->filesystem->fileExists($targetFileName)) {
-            // 로깅
-            $this->assembleLogData(
-                userIdx: $nowUser['userIdx'],
-                userName: $nowUser['userName'],
-                targetIdx: $fileIdx,
-                targetClass: get_class($this),
-                actionFunc: __METHOD__,
-                details: $details
-            );
+        if($nowUser['userIdx'] === $targetFile['userIdx'] || $nowUser['userStatus'] === '관리자') {
+            if ($this->filesystem->fileExists($targetFileName)) {
+                // 로깅
+                $this->assembleLogData(
+                    userIdx: $nowUser['userIdx'],
+                    userName: $nowUser['userName'],
+                    targetIdx: $fileIdx,
+                    targetClass: get_class($this),
+                    actionFunc: __METHOD__,
+                    details: $details
+                );
 
-            // 파일 헤더 설정
-            header('Content-Type: application/octet-stream; charset=utf-8');
-            header('Content-Disposition: attachment; filename="' . rawurlencode($targetFileOriginName) . '"');
-            header('Content-Length: ' . $this->filesystem->fileSize($targetFileName));
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                // 파일 헤더 설정
+                header('Content-Type: application/octet-stream; charset=utf-8');
+                header('Content-Disposition: attachment; filename="' . rawurlencode($targetFileOriginName) . '"');
+                header('Content-Length: ' . $this->filesystem->fileSize($targetFileName));
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 
-            echo $this->filesystem->read($targetFileName);
-            exit();
+                echo $this->filesystem->read($targetFileName);
+                exit();
+            }
         }
     }
 
