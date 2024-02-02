@@ -122,7 +122,7 @@ include __DIR__ . '/../part/nav.php';
                         <div class="mb-3">
                             <label for="detailModalContent" class="form-label">내용:</label>
                             <textarea class="form-control details" name="details"
-                                      rows="3" disabled></textarea>
+                                      rows="10" disabled></textarea>
                         </div>
                     </div>
                 </div>

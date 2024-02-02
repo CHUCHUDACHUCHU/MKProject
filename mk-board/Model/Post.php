@@ -538,4 +538,27 @@ class Post extends BaseModel {
         }
     }
 
+    public function countPhysicalDeletedTarget() {
+        try {
+            $query = "SELECT COUNT(*) as rowCount FROM posts WHERE DATEDIFF(NOW(), deleted_at) >= 30";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteByCron(): bool
+    {
+        try {
+            $query = "DELETE FROM posts WHERE DATEDIFF(NOW(), deleted_at) >= 30";
+            return $this->conn->prepare($query)->execute();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
 }

@@ -46,7 +46,7 @@ trait ControllerUtils   {
 
     /**
      * json 형식으로 출력 (Ajax 요청에 반환 값)
-     * @param $data array|object
+     * @param array $data array|object
      * @return void
      */
     public function echoJson(array $data){
@@ -87,6 +87,7 @@ trait ControllerUtils   {
 
     public function sendEmail($recipients, $subject, $body): string
     {
+        $config = parse_ini_file(__DIR__ . '/../config.ini');
         $mail = new PHPMailer();
         $mail->CharSet = 'UTF-8';
         $mail->SMTPDebug = SMTP::DEBUG_OFF; // 디버그 모드, DEBUG_OFF 시 출력 없음
@@ -94,13 +95,13 @@ trait ControllerUtils   {
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->SMTPKeepAlive = true;
-        $mail->Username = 'yoon7548@gmail.com';
-        $mail->Password = 'ellh yjlt wtct vpng';
+        $mail->Username = $config['SMTP_EMAIL'];
+        $mail->Password = $config['SMTP_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
+        $mail->Port = $config['SMTP_PORT'];
         $mail->Timeout = 10;
-        $keyPath = '/etc/ssl/private/my-ssl-cert.key';
-        $certPath = '/etc/ssl/certs/my-ssl-cert.pem';
+        $keyPath = $config['SSL_KEY_PATH'];
+        $certPath = $config['SSL_CERT_PATH'];
         $mail->SMTPOptions = array(
             'ssl' => array(
                 'local_cert' => $certPath,
@@ -111,7 +112,7 @@ trait ControllerUtils   {
             )
         );
 
-        $mail->setFrom('yoon7548@gmail.com', 'MK-board');
+        $mail->setFrom($config['SMTP_EMAIL'], 'MKBoard');
 
         // 다중 이메일 주소 추가
         foreach ($recipients as $recipient) {

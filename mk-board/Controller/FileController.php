@@ -15,6 +15,7 @@ class FileController extends BaseController
 {
     private false|array $config;
     private LocalFilesystemAdapter $adapter;
+    private Filesystem $filesystem;
     private File $file;
     private User $user;
 
@@ -22,6 +23,7 @@ class FileController extends BaseController
     {
         $this->config = parse_ini_file(__DIR__ . '/../config.ini');
         $this->adapter = new LocalFilesystemAdapter($this->config['FILE_UPLOAD_PATH']);
+        $this->filesystem = new Filesystem($this->adapter);  // 수정된 부분
         $this->file = new File();
         $this->user = new User();
     }
@@ -56,18 +58,16 @@ class FileController extends BaseController
 
     public function fileUpload()
     {
-        $filesystem = new Filesystem($this->adapter);  // 수정된 부분
-
         if(!empty($_FILES['file'])) {
             $fileOriginName = $_FILES['file']['name'];
             $fileSize = $this->formatSizeUnits($_FILES['file']['size']);
             $fileName = uniqid('uploaded_file_') . '.' . pathinfo($fileOriginName, PATHINFO_EXTENSION);
 
             $stream = fopen($_FILES['file']['tmp_name'], 'r+');
-            $filesystem->writeStream($fileName, $stream);
+            $this->filesystem->writeStream($fileName, $stream);
             fclose($stream);
 
-            if ($filesystem->fileExists($fileName)) {
+            if ($this->filesystem->fileExists($fileName)) {
                 $result = ['fileName' => $fileName , 'fileOriginName' => $fileOriginName, 'fileSize' => $fileSize];
             } else {
                 $result = ['error' => 'Failed to save the file.'];
@@ -126,29 +126,30 @@ class FileController extends BaseController
         $fileIdx = $requestData['fileIdx'];
         $targetFile = $this->file->getFileById($fileIdx);
         $targetFileName = $targetFile['fileName'];
+        $targetFileOriginName = $targetFile['fileOriginName'];
         $targetFilePostIdx = $targetFile['postIdx'];
-        $filePath = '/var/www/html/mk-board/assets/uploads/' . $targetFileName;
 
         $nowUser = $this->user->getUserById($_SESSION['userIdx']);
         $details = "(fileIdx : " . $fileIdx . ") is connected on (postIdx : " . $targetFilePostIdx . ")";
 
-        if(file_exists($filePath)) {
-            //로깅
-            $this->assembleLogData( userIdx: $nowUser['userIdx'],
+        if ($this->filesystem->fileExists($targetFileName)) {
+            // 로깅
+            $this->assembleLogData(
+                userIdx: $nowUser['userIdx'],
                 userName: $nowUser['userName'],
                 targetIdx: $fileIdx,
                 targetClass: get_class($this),
                 actionFunc: __METHOD__,
-                details: $details);
+                details: $details
+            );
 
-            // 파일 다운로드를 위한 헤더 설정
-            header('Content-Type: application/octet-stream');
-            header('Content-Disposition: attachment; filename="' . $targetFileName . '"');
-            header('Content-Length: ' . filesize($filePath));
+            // 파일 헤더 설정
+            header('Content-Type: application/octet-stream; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . rawurlencode($targetFileOriginName) . '"');
+            header('Content-Length: ' . $this->filesystem->fileSize($targetFileName));
             header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 
-            // 파일을 읽어서 출력
-            readfile($filePath);
+            echo $this->filesystem->read($targetFileName);
             exit();
         }
     }

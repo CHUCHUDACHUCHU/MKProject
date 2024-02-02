@@ -12,6 +12,8 @@ class UserController extends BaseController {
     private Comment $comment;
     private File $file;
     private Department $department;
+    private false|array $config;
+
 
     public function __construct() {
         $this->user = new User();
@@ -19,6 +21,7 @@ class UserController extends BaseController {
         $this->comment = new Comment();
         $this->file = new File();
         $this->department = new Department();
+        $this->config = parse_ini_file(__DIR__ . '/../config.ini');
     }
 
     public function userCodeStatus() {
@@ -65,8 +68,9 @@ class UserController extends BaseController {
         $userPhone = $_POST['userPhone'];
         $userStatus = $_POST['userStatus'];
 
-        $salt = '$5$QOPrAVIK$';
-        $userPw = crypt('MKboard1234', $salt);
+        $salt = $this->config['PASSWORD_SALT'];
+        $passwordInit = $this->config['PASSWORD_INIT'];
+        $userPw = crypt($passwordInit, $salt);
 
         $nowUser = $this->user->getUserById($_SESSION['userIdx']);
 
@@ -82,12 +86,12 @@ class UserController extends BaseController {
                     $mailSubject = "MKBoard 사용자 생성이 완료되었습니다. $userName 님";
                     $mailBody = "
                                 <b>사용자 이메일: $userEmail</b><br/>
-                                <b>기본 비밀번호: MKboard1234</b><br/>
+                                <b>기본 비밀번호: $passwordInit</b><br/>
                                 <br/>
                                 <br/>
                                 <b>기본 비밀번호를 변경해야 이용이 가능합니다.</b><br/>
                                 도메인 주소 : http://localhost/mk-board<br/>
-                                본 메일은 MK-Board에서 발송된 것입니다.
+                                본 메일은 MKBoard 에서 발송된 것입니다.
                             ";
 
                     $result = $this->sendEmail($recipients, $mailSubject, $mailBody);
@@ -187,7 +191,7 @@ class UserController extends BaseController {
                      <b>인증번호: $verificationCode</b>
                      <br/>
                      <br/>
-                     본 메일은 MK-Board에서 발송된 것입니다.
+                     본 메일은 MKBoard 에서 발송된 것입니다.
                     ";
         $recipients = [];
         array_push($recipients, $nowUser['userEmail']);
@@ -307,7 +311,7 @@ class UserController extends BaseController {
         $nowUser = $this->user->getUserById($_SESSION['userIdx']);
         $userInit = $_SESSION['userInit'];
 
-        $salt = '$5$QOPrAVIK$';
+        $salt = $this->config['PASSWORD_SALT'];
         $nowPassword = crypt($nowPassword, $salt);
         $changePassword = crypt($changePassword, $salt);
 
@@ -438,8 +442,9 @@ class UserController extends BaseController {
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userEmail = $requestData['userEmail'];
 
-        $salt = '$5$QOPrAVIK$';
-        $changePassword = crypt('MKboard1234', $salt);
+        $salt = $this->config['PASSWORD_SALT'];
+        $passwordInit = $this->config['PASSWORD_INIT'];
+        $changePassword = crypt($passwordInit, $salt);
 
         $result = [
             'status' => '',
@@ -452,12 +457,12 @@ class UserController extends BaseController {
                 $mailSubject = "MKBoard 사용자의 비밀번호가 초기화되었습니다.";
                 $mailBody = "
                                 <b>사용자 이메일: $userEmail</b><br/>
-                                <b>기본 비밀번호: MKboard1234</b><br/>
+                                <b>기본 비밀번호: $passwordInit</b><br/>
                                 <br/>
                                 <br/>
                                 <b>기본 비밀번호를 변경해야 이용이 가능합니다.</b><br/>
                                 도메인 주소 : http://localhost/mk-board<br/>
-                                본 메일은 MK-Board에서 발송된 것입니다.
+                                본 메일은 MKBoard 에서 발송된 것입니다.
                             ";
 
                 $recipients = [];

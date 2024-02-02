@@ -13,7 +13,7 @@ class User extends BaseModel {
     /**
      * User의 개수
      * @param string $search
-     * @return int|mixed
+     * @return int
      */
     public function countAll(string $search): int
     {
@@ -312,6 +312,29 @@ class User extends BaseModel {
             return $this->conn->prepare($query)->execute([
                 'userEmail' => $userEmail
             ]);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    public function countPhysicalDeletedTarget() {
+        try {
+            $query = "SELECT COUNT(*) as rowCount FROM users WHERE DATEDIFF(NOW(), deleted_at) >= 30";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteByCron(): bool
+    {
+        try {
+            $query = "DELETE FROM users WHERE DATEDIFF(NOW(), deleted_at) >= 30";
+            return $this->conn->prepare($query)->execute();
         } catch (PDOException $e) {
             error_log($e->getMessage());
             return false;

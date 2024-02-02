@@ -754,8 +754,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
         downloadBtn.forEach(function (item) {
             item.addEventListener('click', function () {
                 const fileIdx = this.closest('.fileList').querySelector('.fileIdx').innerHTML;
-                const fileOriginName = this.closest('.fileList').querySelector('.downloadATag').innerHTML;
-                handleDownload(fileIdx, fileOriginName);
+                handleDownload(fileIdx);
             });
         });
     }
@@ -765,13 +764,12 @@ document.addEventListener('DOMContentLoaded', function (event) {
         downloadATag.forEach(function (item) {
             item.addEventListener('click', function () {
                 const fileIdx = this.closest('.fileList').querySelector('.fileIdx').innerHTML;
-                const fileOriginName = this.closest('.fileList').querySelector('.downloadATag').innerHTML;
-                handleDownload(fileIdx, fileOriginName);
+                handleDownload(fileIdx);
             });
         });
     }
 
-    const handleDownload = (fileIdx, fileOriginName) => {
+    const handleDownload = (fileIdx) => {
             fetch(`/mk-board/file/download`, {
                 method: 'POST',
                 headers: {
@@ -785,10 +783,14 @@ document.addEventListener('DOMContentLoaded', function (event) {
                     if (res.status !== 200) {
                         throw new Error('Network response was not 200');
                     }
-                    return res.blob();
+                    const contentDisposition = res.headers.get('content-disposition');
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    const fileOriginName = decodeURIComponent(filenameMatch[1]);
+                    return res.blob().then(blob => ({ blob, fileOriginName }));
                 })
-                .then((blob) => {
+                .then(({ blob, fileOriginName }) => {
                     console.log('파일다운로드 중');
+                    console.log(blob);
                     const downloadLink = document.createElement('a');
                     downloadLink.href = URL.createObjectURL(blob);
                     downloadLink.download = fileOriginName;
