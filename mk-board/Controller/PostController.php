@@ -56,6 +56,7 @@ class PostController extends BaseController {
                 $result['status'] = 'success';
                 $result['message'] = '게시글 DB 생성에 성공하였습니다.';
                 $result['postIdx'] = $postIdx;
+                $result['userStatus'] = $nowUser['userStatus'];
             } else {
                 $result['status'] = 'fail';
                 $result['message'] = '게시글 DB 생성에 실패하였습니다.';
@@ -66,39 +67,7 @@ class PostController extends BaseController {
         }
         $this->echoJson(['result' => $result]);
     }
-    
-    /**
-     * Post 생성하기 By Form
-     * 그냥 게시글만 생성.
-     */
-    public function createByForm()
-    {
-        /* body 값 */
-        $title = $_POST['title'];
-        $content = $_POST['content'];
-        $commonOrNotifyRadio = $_POST['commonOrNotifyRadio'];
 
-        $userIdx = $_SESSION['userIdx'];
-        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
-
-        if ($this->parametersCheck($userIdx, $title, $content, $commonOrNotifyRadio)) {
-            $postIdx = $this->post->create($userIdx, $title, $content, $commonOrNotifyRadio);
-            if ($postIdx) {
-                //로깅
-                $this->assembleLogData( userIdx: $nowUser['userIdx'],
-                                        userName: $nowUser['userName'],
-                                        targetIdx: $postIdx,
-                                        targetClass: get_class($this),
-                                        actionFunc: __METHOD__);
-
-                $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');
-            } else {
-                $this->redirectBack('댓글 작성에 실패했습니다.');
-            }
-        } else {
-            $this->redirectBack('입력되지 않은 값이 있습니다!');
-        }
-    }
 
     /**
      * Post 수정하기 By Fetch
@@ -139,37 +108,6 @@ class PostController extends BaseController {
         }
         $this->echoJson(['result' => $result]);
     }
-
-    /**
-     * Post 수정하기 By Form
-     * 파일 수정 따로 안 할 때!
-     */
-    public function updateByForm() {
-        /* body 값 */
-        $postIdx = $_POST['postIdx'];
-        $title = $_POST['title'];
-        $content = $_POST['content'];
-
-        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
-
-        if($this->parametersCheck($postIdx, $title, $content)) {
-            if($this->post->update($postIdx, $title, $content)) {
-                //로깅
-                $this->assembleLogData( userIdx: $nowUser['userIdx'],
-                                        userName: $nowUser['userName'],
-                                        targetIdx: $postIdx,
-                                        targetClass: get_class($this),
-                                        actionFunc: __METHOD__);
-
-                $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');
-            } else {
-                $this->redirectBack('DB 변경에 실패하였습니다.');
-            }
-        } else {
-            $this->redirectBack('입력되지 않은 값이 있습니다.');
-        }
-    }
-
 
     /**
      * 게시글 권한 변경 요청

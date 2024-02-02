@@ -25,13 +25,13 @@ class Comment {
             // 테이블이 존재하지 않으면 테이블 생성
             if (!$checkTableExists) {
                 $createTableSQL = "CREATE TABLE $tableName (
-            commentIdx INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            postIdx INT UNSIGNED NOT NULL,
-            userIdx INT UNSIGNED NOT NULL,
-            content TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            deleted_at DATETIME DEFAULT NULL
+                                        commentIdx INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                                        postIdx INT UNSIGNED NOT NULL,
+                                        userIdx INT UNSIGNED NOT NULL,
+                                        content TEXT NOT NULL,
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                        deleted_at DATETIME DEFAULT NULL
         )";
                 $this->conn->exec($createTableSQL);
                 echo "Table $tableName created successfully\n";

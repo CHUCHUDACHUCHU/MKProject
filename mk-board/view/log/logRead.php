@@ -6,50 +6,51 @@ include __DIR__ . '/../part/head.php';
 <?php
 include __DIR__ . '/../part/nav.php';
 ?>
-<div class="m-4">
-    <div id="write_btn" class="mb-4">
-        <a href="/mk-board/post/create">
-            <button class="btn btn-primary float-right">글쓰기</button>
-        </a>
-    </div>
-
+<div class="m-5">
     <!--검색-->
-    <div class="container mt-4 mb-3">
-        <form action="" method="get">
-            <div class="row">
-                <div class="form-inline full-width-form" style="margin-left: 150px">
-                    <div class="form-group flex-fill">
-                        <label for="searchInput" class="sr-only">검색</label>
-                        <input name="search" type="text" class="form-control w-100" id="searchInput"
-                               placeholder="Search"
-                               value="<?= $_GET['search'] ?? '' ?>">
-                    </div>
-                    <button id="searchSubmit" type="submit" class="btn btn-primary">검색</button>
-                </div>
-
-                <div class="ml-auto">
-                    <div class="row">
-                        <!-- 필터링 드롭다운 버튼 -->
-                        <div class="dropdown departmentFiltering ml-2">
-                            <small>부서: </small>
-                            <button type="button" class="btn btn-secondary dropdown-toggle" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <?php
-                                $departmentText = isset($_GET['departmentName']) ? $_GET['departmentName'] : '전체선택';
-                                ?>
-                                <span><?= $departmentText ?></span>
+    <div class="container mb-3">
+        <div class="row justify-content-end">
+            <div class="col-4">
+                <!-- 검색 폼 -->
+                <div class="d-flex justify-content-center">
+                    <div class="form-inline row">
+                        <div class="dropdown searchFiltering mr-2">
+                            <small>종류: </small>
+                            <button type="button" class="btn btn-secondary dropdown-toggle" id="selectedLogFilter" style="width: 120px" data-bs-toggle="dropdown" aria-expanded="false">
+                                <?=!empty($_GET['filter']) ? $_GET['filter'] : "전체선택"?>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="filterDropdown">
                                 <!-- 드롭다운 메뉴 아이템들을 여기에 추가 -->
-                                <a class="dropdown-item" href="/mk-board/post/list">전체선택</a>
-                                <?php foreach ($departments as $dept): ?>
-                                    <a class="dropdown-item" href="/mk-board/post/list?departmentName=<?= $dept['departmentName'] ?>"><?= $dept['departmentName'] ?></a>
-                                <?php endforeach; ?>
+                                <a class="dropdown-item log-search-dropdown-item">전체선택</a>
+                                <a class="dropdown-item log-search-dropdown-item">userName</a>
+                                <a class="dropdown-item log-search-dropdown-item">targetClass</a>
+                                <a class="dropdown-item log-search-dropdown-item">actionFunc</a>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchInput" class="sr-only">검색</label>
+                            <input name="search" type="text" class="form-control" id="searchInput"
+                                   placeholder="Search"
+                                   value="<?= $_GET['search'] ?? '' ?>" disabled>
+                            <input type="hidden" name="startDate" value="<?= $_GET['startDate'] ?? date('Y-m-d'); ?>">
+                            <input type="hidden" name="endDate" value="<?= $_GET['endDate'] ?? date('Y-m-d'); ?>">
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
+
+            <div class="col-4">
+                <div class="input-group d-flex align-items-center">
+                    <label class="mr-2">날짜:</label>
+                    <input type="text" class="form-control date" id="startDate" style="cursor: pointer">
+
+                    <label class="ml-2 mr-2">~</label>
+                    <input type="text" class="form-control date" id="endDate" style="cursor: pointer">
+
+                    <button id="dateSearchSubmit" type="button" class="btn btn-primary ml-2">완료</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -71,7 +72,16 @@ include __DIR__ . '/../part/nav.php';
             </thead>
             <tbody>
             <?php
-            $logs = $log->getAllLog();
+            // GET 매개변수에서 시작 날짜와 종료 날짜 가져오기
+            $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : date('Y-m-d');;
+            $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : date('Y-m-d');;
+            $filter = !empty($_GET['filter']) ? $_GET['filter'] : "";
+            $search = !empty($_GET['search']) ? $_GET['search'] : "";
+
+            $startDate .= " 00:00:00";
+            $endDate .= " 23:59:59";
+
+            $logs = $log->getLogsByDateRange($filter, $search, $startDate, $endDate);
             if ($logs) {
                 foreach ($logs as $logInfo) {
                     $detailBtn = '';

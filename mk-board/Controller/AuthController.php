@@ -10,9 +10,12 @@ use Model\User;
 
 class AuthController extends BaseController{
     private User $user;
+    private false|array $config;
+
 
     public function __construct() {
         $this->user = new User();
+        $this->config = parse_ini_file(__DIR__ . '/../config.ini');
     }
 
     /**
@@ -25,7 +28,7 @@ class AuthController extends BaseController{
         $userEmail = $_POST['userEmail'];
         $userPw = $_POST['userPw'];
 
-        $salt = '$5$QOPrAVIK$';
+        $salt = $this->config['PASSWORD_SALT'];
         $hashPw = crypt($userPw, $salt);
 
         if($this->parametersCheck($userEmail, $hashPw)) {

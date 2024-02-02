@@ -115,9 +115,9 @@ class User extends BaseModel {
      * 회원 이메일 수정
      * @param $changeEmail
      * @param $userIdx
-     * @return array|mixed
+     * @return bool
      */
-    public function updateEmail($changeEmail, $userIdx)
+    public function updateEmail($changeEmail, $userIdx): bool
     {
         try {
             $query = "update users set userEmail =:changeEmail where userIdx =:userIdx ";
@@ -136,9 +136,9 @@ class User extends BaseModel {
      * 회원 권한 수정
      * @param $userStatus
      * @param $userEmail
-     * @return array|mixed
+     * @return bool
      */
-    public function updateStatus($userStatus, $userEmail)
+    public function updateStatus($userStatus, $userEmail): bool
     {
         try {
             $query = "update users set userStatus =:userStatus where userEmail =:userEmail ";
@@ -183,9 +183,9 @@ class User extends BaseModel {
      * 회원 비밀번호 초기화
      * @param $userEmail
      * @param $changePassword
-     * @return array|mixed
+     * @return mixed
      */
-    public function resetPassword($userEmail, $changePassword)
+    public function resetPassword($userEmail, $changePassword): mixed
     {
         try {
             $query = "update users set userPw =:changePassword, userInit = 0 where userEmail =:userEmail ";
@@ -200,13 +200,12 @@ class User extends BaseModel {
     }
 
 
-
     /**
      * 회원 데이터 가져오기(userEmail)
      * @param $userEmail string User의 userEmail
-     * @return array|mixed
+     * @return mixed
      */
-    public function getUserByEmail(string $userEmail)
+    public function getUserByEmail(string $userEmail): mixed
     {
         try {
             $query = "SELECT 
@@ -229,9 +228,9 @@ class User extends BaseModel {
     /**
      * 회원 데이터 가져오기(userIdx)
      * @param $userIdx int User의 userIdx
-     * @return array|mixed
+     * @return mixed
      */
-    public function getUserById(int $userIdx)
+    public function getUserById(int $userIdx): mixed
     {
         try {
             $query = "SELECT 
@@ -245,6 +244,30 @@ class User extends BaseModel {
                 'userIdx' => $userIdx
             ]);
             return $stmt->fetch();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 모든 관리자 가져오기
+     * @return bool|array
+     */
+    public function getAllAdminUsers(): bool|array
+    {
+        try {
+            $query = "SELECT 
+                                u.*,
+                                d.departmentName
+                                FROM users u
+                                JOIN departments d on d.departmentIdx = u.departmentIdx
+                                WHERE userStatus = :userStatus and u.deleted_at is null";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                'userStatus' => "관리자"
+            ]);
+            return $stmt->fetchAll();
         } catch (PDOException  $e) {
             error_log($e->getMessage());
             return false;

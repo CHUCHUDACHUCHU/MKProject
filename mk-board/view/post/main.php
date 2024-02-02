@@ -17,16 +17,6 @@ include __DIR__ . '/../part/head.php';
         <div class="container mt-4 mb-3">
             <form action="" method="get">
                 <div class="row">
-                    <div class="form-inline full-width-form" style="margin-left: 150px">
-                        <div class="form-group flex-fill">
-                            <label for="searchInput" class="sr-only">검색</label>
-                            <input name="search" type="text" class="form-control w-100" id="searchInput"
-                                   placeholder="Search"
-                                   value="<?= $_GET['search'] ?? '' ?>">
-                        </div>
-                        <button id="searchSubmit" type="submit" class="btn btn-primary">검색</button>
-                    </div>
-
                     <div class="ml-auto">
                         <div class="row">
                             <!-- 필터링 드롭다운 버튼 -->

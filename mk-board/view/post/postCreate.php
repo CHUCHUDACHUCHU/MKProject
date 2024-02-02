@@ -17,7 +17,7 @@ include __DIR__ . '/../part/head.php';
         <hr/>
 
 
-        <form action="/mk-board/post/create/form" method="post" class="myPostCreateFormGroup" id="myPostCreateFormGroup">
+        <div class="postCreateBox">
             <div class="form-group">
                 <input type="text" class="form-control mb-2" id="title" name="title" placeholder="제목을 입력하세요">
                 <input type="text" class="form-control" value="<?=$nowUser['userEmail']?>" readonly>
@@ -62,14 +62,19 @@ include __DIR__ . '/../part/head.php';
                 </li>
             </ul>
 
+            <!-- 로딩 스피너 추가 -->
+            <div id="loading-spinner" style="display: none; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <img src="/mk-board/assets/img/spinner.gif" alt="로딩 중..." /> <!-- 스피너 이미지 등을 넣어주세요 -->
+                <b style="display: block">게시글 생성 중...</b>
+            </div>
 
 
             <div class="form-group">
                 <hr/>
                 <textarea class="form-control" id="content" name="content" rows="10" placeholder="내용을 입력하세요"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary" id="completeButton">완료</button>
-        </form>
+            <button type="button" class="btn btn-primary" id="completeButton">완료</button>
+        </div>
     </div>
 </body>
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
@@ -84,7 +89,7 @@ include __DIR__ . '/../part/head.php';
     const maxFileSize = 100;
 
     const dropzone = new Dropzone(".dropzone", {
-        url: "http://localhost/mk-board/file/upload", // 파일을 업로드할 서버 주소 url.
+        url: "/mk-board/file/upload", // 파일을 업로드할 서버 주소 url.
         method: "post",
 
         previewTemplate: previewTemplate,                       // 커스텀 업로드 테마
@@ -99,8 +104,7 @@ include __DIR__ . '/../part/head.php';
                         'application/msword, ' +
                         'application/vnd.ms-excel, ' +
                         'application/vnd.ms-powerpoint, ' +
-                        'text/plain, ' +
-                        'application/zip',
+                        'text/plain, ',
         dictMaxFilesExceeded: `파일 갯수가 너무 많습니다. 최대${maxFilesAllowed}개 입니다.`,
         dictFileTooBig: `${maxFileSize}MB를 초과합니다. 파일을 삭제해주세요.`
 
@@ -109,8 +113,7 @@ include __DIR__ . '/../part/head.php';
     let uploadedFileIndexes = [];
 
     const completeButton = document.getElementById('completeButton');
-    completeButton.addEventListener('click', function (event) {
-        event.preventDefault();
+    completeButton.addEventListener('click', function () {
         const fileCount = dropzone.files.length;
         const isAllFilesValid = dropzone.files.every(function (file) {
             return file.size <= maxFileSize * 1024 * 1024;
@@ -118,8 +121,8 @@ include __DIR__ . '/../part/head.php';
 
         if (fileCount <= maxFilesAllowed && isAllFilesValid) {
             if(fileCount === 0) {
-                // 파일 없을 시 바로 form 제출
-                document.getElementById('myPostCreateFormGroup').submit();
+                //파일 업로드 할게 없을 땐, false 전달
+                postCreateFetch(false);
             }
             dropzone.processQueue();
         } else {
@@ -135,7 +138,10 @@ include __DIR__ . '/../part/head.php';
     dropzone.on('success', function (file, data) {
         // 파일 업로드 성공 후의 로직을 여기에 추가
         console.log('파일 업로드 중 : ', data.result.fileOriginName);
+        fileCreateFetch(data);
+    });
 
+    function fileCreateFetch(data) {
         fetch('/mk-board/file/create', {
             method: 'POST',
             headers: {
@@ -160,7 +166,7 @@ include __DIR__ . '/../part/head.php';
                     console.log('업로드한 파일 개수:', uploadedFileIndexes.length);
 
                     if (uploadedFileIndexes.length === dropzone.files.length) {
-                        savePostToDB();
+                        postCreateFetch(true);
                     }
                 } else {
                     alert(data.result.message);
@@ -169,10 +175,10 @@ include __DIR__ . '/../part/head.php';
             .catch((err) => {
                 alert('파일 DB 저장 요청 : fetch 에러 ' + err);
             })
-    });
+    }
 
     // 게시글 DB 저장 함수
-    function savePostToDB() {
+    function postCreateFetch(withFile) {
         const title = document.getElementById('title');
         const content = document.getElementById('content');
         const radioButtons = document.getElementsByName("commonOrNotifyRadio");
@@ -202,11 +208,18 @@ include __DIR__ . '/../part/head.php';
                 return res.json();
             })
             .then((data) => {
-                if(data.result.status === 'success') {
-                    console.log('게시글 DB저장 성공!');
-                    connectFileWithPost(data.result.postIdx);
-                } else {
-                    alert(data.result.message);
+                if(sendEmailToAllAdmin(data.result.postIdx, data.result.userStatus)) {
+                    if(withFile) {
+                        if(data.result.status === 'success') {
+                            console.log('게시글 DB 저장 성공!');
+                            connectFileWithPost(data.result.postIdx);
+                        } else {
+                            alert(data.result.message);
+                        }
+                    } else {
+                        console.log('파일 없이!!!');
+                        location.href=`/mk-board/post/read?postIdx=${data.result.postIdx}`;
+                    }
                 }
             })
             .catch((err) => {
@@ -214,6 +227,9 @@ include __DIR__ . '/../part/head.php';
             })
     }
 
+
+
+    const loadingSpinner = document.getElementById('loading-spinner');
     function connectFileWithPost(postIdx) {
         fetch('/mk-board/file/connect', {
             method: 'POST',
@@ -237,6 +253,27 @@ include __DIR__ . '/../part/head.php';
             .catch(error => {
                 console.error('Error:', error);
             });
+    }
+
+    function sendEmailToAllAdmin(data, status) {
+        if(status !== '관리자') {
+            fetch('/mk-board/email/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: data,
+                    type: 'sendEmailToAllAdminByPostCreate'
+                })
+            })
+                .catch(error => {
+                    console.error('Error:', error);
+                    return true;
+                });
+        }
+        loadingSpinner.style.display = 'flex';
+        return true;
     }
 </script>
 </html>

@@ -42,11 +42,20 @@ document.addEventListener('DOMContentLoaded', function (event) {
      * */
 
     const userCreationForm = document.getElementById('userCreationForm');
+    const rejectMessageModalForm = document.getElementById('rejectMessageModalForm');
     const loadingSpinner = document.getElementById('loading-spinner');
+    const modalLoadingSpinner = document.getElementById('modal-loading-spinner');
 
     if(userCreationForm) {
         userCreationForm.addEventListener('submit', function () {
             loadingSpinner.style.display = 'block';
+            return true;
+        })
+    }
+
+    if(rejectMessageModalForm) {
+        rejectMessageModalForm.addEventListener('submit', function () {
+            modalLoadingSpinner.style.display = 'block';
             return true;
         })
     }
@@ -248,48 +257,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
             }
         })
     } 
-    
-    
-    /**
-     * 이메일 전체보내기 테스트
-     * */
-    const emailAllTest = document.querySelector('.emailAllTest');
-    if(emailAllTest) {
-        emailAllTest.addEventListener('click', function () {
-            const userEmail = document.querySelector('.userEmail');
-            const userName = document.querySelector('.userName');
-            const departmentName = document.querySelector('.departmentName');
 
-            console.log(userEmail);
-
-            // fetch(`/mk-board/user/update/email`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({
-            //         changeEmail: email.value,
-            //     }),
-            // })
-            //     .then((res) => {
-            //         if (res.status !== 200) {
-            //             throw new Error('Network response was not 200');
-            //         }
-            //         return res.json();
-            //     })
-            //     .then((data) => {
-            //         if(data.result.status === 'success') {
-            //             alert(data.result.message);
-            //             location.href='/mk-board/user/my-page';
-            //         } else {
-            //             alert(data.result.message);
-            //         }
-            //     })
-            //     .catch((err) => {
-            //         alert('이메일 수정 요청 : fetch 에러 ' + err);
-            //     });
-        })
-    }
 
     /**
      * 비밀번호 초기화 버튼 이벤트 처리
@@ -332,6 +300,26 @@ document.addEventListener('DOMContentLoaded', function (event) {
         })
     }
 
+    function sendEmailToUserStatusChanged(data) {
+        fetch('/mk-board/email/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: data,
+                type: 'sendEmailToUserStatusChanged'
+            })
+        })
+            .catch(error => {
+                console.error('Error:', error);
+                return true;
+            });
+        loadingSpinner.style.display = 'flex';
+        return true;
+    }
+
+
     /**
      * 회원 권한 변경 요청 이벤트 등록
      * */
@@ -340,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
         userStatusDropdownItems.forEach(function (item) {
             item.addEventListener('click', function () {
                 const selectedValue = this.getAttribute('data-value');
-                const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
+                const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(2);
 
                 fetch(`/mk-board/user/update/status`, {
                     method: 'POST',
@@ -360,6 +348,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                     })
                     .then((data) => {
                         if(data.result.status === 'success') {
+                            sendEmailToUserStatusChanged(userEmail);
                             alert(data.result.message);
                             location.href='/mk-board/user/manage';
                         } else {
@@ -380,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
     if(deleteButtons) {
         deleteButtons.forEach(function (item) {
             item.addEventListener('click', function () {
-                const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(4);
+                const userEmail = this.closest('.userInfoDashboard').querySelector('.userEmail').textContent.slice(2);
                 console.log(userEmail);
                 if(confirm('정말 삭제하시겠습니까?')) {
                     fetch(`/mk-board/user/delete`, {
@@ -596,6 +585,25 @@ document.addEventListener('DOMContentLoaded', function (event) {
         });
     }
 
+    function sendEmailToPostStatusChanged(data) {
+        fetch('/mk-board/email/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: data,
+                type: 'sendEmailToPostStatusChanged'
+            })
+        })
+            .catch(error => {
+                console.error('Error:', error);
+                return true;
+            });
+        loadingSpinner.style.display = 'block';
+        return true;
+    }
+
 
     /**
      * 게시글 권한 변경 요청 이벤트 등록 (외부에서)
@@ -631,6 +639,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                             })
                             .then((data) => {
                                 if(data.result.status === 'success') {
+                                    sendEmailToPostStatusChanged(postIdx);
                                     location.reload();
                                 } else {
                                     alert(data.result.message);
@@ -658,9 +667,19 @@ document.addEventListener('DOMContentLoaded', function (event) {
             item.addEventListener('click', function () {
                 const postIdx = this.closest('.postStatusBox').querySelector('.postIdx').value;
                 console.log(postIdx);
-                const rejectMessageModal = $('#rejectMessageModal');
-                rejectMessageModal.find('#modalPostIdx').val(postIdx);
-                rejectMessageModal.modal('show');
+
+                //조회한 적이 있는지 확인하고 있다면, 외부에서 권한 변경 가능!
+                const cookieName = `post_views${postIdx}=1`;
+                const hasCookie = document.cookie.includes(cookieName);
+                if(hasCookie) {
+                    const rejectMessageModal = $('#rejectMessageModal');
+                    rejectMessageModal.find('#modalPostIdx').val(postIdx);
+                    rejectMessageModal.modal('show');
+                } else {
+                    alert('게시글을 조회한 뒤 권한 변경을 해주세요.')
+                    window.location.href = `/mk-board/post/read?postIdx=${postIdx}`;
+                }
+
             })
         })
     }
@@ -677,37 +696,35 @@ document.addEventListener('DOMContentLoaded', function (event) {
                 const selectedValue = this.value;
                 const postIdx = document.getElementById('postIdx').value;
 
-                if(selectedValue === '반려') {
-
+                if(confirm('정말 변경하시겠습니까?')) {
+                    fetch(`/mk-board/post/update/status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            postIdx: postIdx,
+                            postStatus: selectedValue
+                        }),
+                    })
+                        .then((res) => {
+                            if (res.status !== 200) {
+                                throw new Error('Network response was not 200');
+                            }
+                            return res.json();
+                        })
+                        .then((data) => {
+                            if (data.result.status === 'success') {
+                                sendEmailToPostStatusChanged(postIdx);
+                                location.reload();
+                            } else {
+                                alert(data.result.message);
+                            }
+                        })
+                        .catch((err) => {
+                            alert('게시글 권한 변경 요청 : fetch 에러 ' + err);
+                        });
                 }
-
-                fetch(`/mk-board/post/update/status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        postIdx: postIdx,
-                        postStatus: selectedValue
-                    }),
-                })
-                    .then((res) => {
-                        if (res.status !== 200) {
-                            throw new Error('Network response was not 200');
-                        }
-                        return res.json();
-                    })
-                    .then((data) => {
-                        if(data.result.status === 'success') {
-                            alert(data.result.message);
-                            location.reload();
-                        } else {
-                            alert(data.result.message);
-                        }
-                    })
-                    .catch((err) => {
-                        alert('게시글 권한 변경 요청 : fetch 에러 ' + err);
-                    });
             });
         });
     }
@@ -732,47 +749,6 @@ document.addEventListener('DOMContentLoaded', function (event) {
      * 파일 다운로드 기능
      * */
 
-    const handleDownload = (fileIdx, fileOriginName) => {
-        fetch(`/mk-board/file/download`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                fileIdx: fileIdx,
-            }),
-        })
-            .then((res) => {
-                if (res.status !== 200) {
-                    throw new Error('Network response was not 200');
-                }
-                return res.json();
-            })
-            .then((data) => {
-                if (data.result.status === 'success') {
-                    const fileName = data.result.fileName;
-                    const targetFilePath = `http://localhost/mk-board/assets/uploads/${fileName}`;
-
-                    // 파일 다운로드를 위한 링크 생성
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = targetFilePath;
-                    downloadLink.download = fileOriginName;
-
-                    // 링크를 DOM에 추가하고 클릭하여 다운로드 시작
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-
-                    // 다운로드 후 링크를 DOM에서 제거
-                    document.body.removeChild(downloadLink);
-                } else {
-                    alert(data.result.message);
-                }
-            })
-            .catch((err) => {
-                alert('댓글 삭제 요청 : fetch 에러 ' + err);
-            });
-    };
-
     const downloadBtn = document.querySelectorAll('.downloadBtn');
     if (downloadBtn) {
         downloadBtn.forEach(function (item) {
@@ -795,6 +771,37 @@ document.addEventListener('DOMContentLoaded', function (event) {
         });
     }
 
+    const handleDownload = (fileIdx, fileOriginName) => {
+            fetch(`/mk-board/file/download`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    fileIdx: fileIdx,
+                }),
+            })
+                .then((res) => {
+                    if (res.status !== 200) {
+                        throw new Error('Network response was not 200');
+                    }
+                    return res.blob();
+                })
+                .then((blob) => {
+                    console.log('파일다운로드 중');
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.download = fileOriginName;
+
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+            })
+                .catch((err) => {
+                    alert('다운로드 요청 중 에러 발생: ' + err);
+                });
+    }
+
 
     /**
      * 로그페이지 detail 모달창 이벤트
@@ -811,6 +818,116 @@ document.addEventListener('DOMContentLoaded', function (event) {
             })
         })
     }
+
+
+    /**
+     * 로그 뷰페이지 날짜 datepicker 제이쿼리 동작 이벤트 등록
+     */
+    $(document).ready(function () {
+        // URL에서 startDate와 endDate 매개변수 확인
+        const urlParams = new URLSearchParams(window.location.search);
+        const startDateParam = urlParams.get('startDate');
+        const endDateParam = urlParams.get('endDate');
+
+        // 오늘 날짜
+        const today = new Date();
+        const todayFormatted = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
+
+        $('.date').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+        $('#startDate').datepicker('setDate', startDateParam ? startDateParam : todayFormatted);
+        $('#endDate').datepicker('setDate', endDateParam ? endDateParam : todayFormatted);
+    });
+
+    /**
+     * 로그 날짜 지정검색 이벤트 등록
+     */
+    const dateSearchSubmitBtn = document.getElementById('dateSearchSubmit');
+    if (dateSearchSubmitBtn) {
+        dateSearchSubmitBtn.addEventListener('click', function () {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const searchInput = document.getElementById('searchInput').value;
+            const selectedLogFilter = document.getElementById('selectedLogFilter').innerText;
+
+            // 날짜 비교
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
+            if (endDateObj < startDateObj) {
+                alert('종료 날짜는 시작 날짜보다 이전일 수 없습니다.');
+                return;
+            }
+
+            let url = `/mk-board/log/manage?startDate=${startDate}&endDate=${endDate}`;
+            if(searchInput) {
+                url += `&filter=${selectedLogFilter}&search=${searchInput}`;
+            }
+
+            window.location.href = url;
+
+        });
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        if (searchInput.value.trim() !== '') {
+            searchInput.removeAttribute('disabled');
+        }
+
+        searchInput.addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const searchInput = document.getElementById('searchInput').value;
+                const selectedLogFilter = document.getElementById('selectedLogFilter').innerText;
+
+                // 날짜 비교
+                const startDateObj = new Date(startDate);
+                const endDateObj = new Date(endDate);
+                if (endDateObj < startDateObj) {
+                    alert('종료 날짜는 시작 날짜보다 이전일 수 없습니다.');
+                    return;
+                }
+
+                let url = `/mk-board/log/manage?startDate=${startDate}&endDate=${endDate}`;
+                if(searchInput) {
+                    url += `&filter=${selectedLogFilter}&search=${searchInput}`;
+                }
+                window.location.href = url;
+            }
+        })
+    }
+
+    // 모든 드롭다운 아이템에 이벤트 리스너 등록
+    const logSearchDropdownItems = document.querySelectorAll('.log-search-dropdown-item');
+    if (logSearchDropdownItems) {
+        logSearchDropdownItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                // 클릭된 아이템의 텍스트를 가져와서 버튼에 적용
+                document.getElementById('selectedLogFilter').textContent = item.textContent;
+
+                const selectedFilter = item.innerText.trim();
+                const searchInput = document.getElementById('searchInput');
+
+                // 미선택일 때는 검색 input을 disabled로 유지
+                if (selectedFilter === '전체선택') {
+                    searchInput.setAttribute('disabled', 'disabled');
+                    searchInput.value = ''; // 값 비우기
+                } else {
+                    // 다른 것들일 때는 검색 input을 활성화
+                    searchInput.removeAttribute('disabled');
+                    // 값이 없을 때는 비워주기
+                    if (selectedFilter.length === 0) {
+                        searchInput.value = '';
+                    }
+                }
+            });
+        });
+    }
+
+
 
 
 });

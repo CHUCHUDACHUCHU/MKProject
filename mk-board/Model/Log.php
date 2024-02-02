@@ -58,4 +58,32 @@ class Log extends BaseModel {
             return [];
         }
     }
+
+
+    public function getLogsByDateRange($filter, $search, $startDate, $endDate): array
+    {
+        try {
+            $query = "SELECT * 
+                          FROM logs 
+                          WHERE created_at BETWEEN :startDate AND :endDate";
+            $params = [
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+            ];
+
+            if (!empty($search)) {
+                $query .= " AND $filter LIKE :search";
+                $params['search'] = "%" . $search . "%";
+            }
+            $query .= " ORDER BY created_at DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($params);
+            return $stmt->fetchAll();
+
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
 }

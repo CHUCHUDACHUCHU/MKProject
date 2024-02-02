@@ -4,18 +4,21 @@ use Model\User;
 use Model\Post;
 use Model\Comment;
 use Model\File;
+use Model\Department;
 
 class UserController extends BaseController {
-    private $user;
-    private $post;
-    private $comment;
-    private $file;
+    private User $user;
+    private Post $post;
+    private Comment $comment;
+    private File $file;
+    private Department $department;
 
     public function __construct() {
         $this->user = new User();
         $this->post = new Post();
         $this->comment = new Comment();
         $this->file = new File();
+        $this->department = new Department();
     }
 
     public function userCodeStatus() {
@@ -73,6 +76,9 @@ class UserController extends BaseController {
             if($this->parametersCheck($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus)) {
                 $userIdx = $this->user->create($userName, $userEmail, $userPw, $departmentIdx, $userPhone, $userStatus);
                 if($userIdx) {
+                    $recipients = [];
+                    array_push($recipients, $userEmail);
+
                     $mailSubject = "MKBoard 사용자 생성이 완료되었습니다. $userName 님";
                     $mailBody = "
                                 <b>사용자 이메일: $userEmail</b><br/>
@@ -83,7 +89,8 @@ class UserController extends BaseController {
                                 도메인 주소 : http://localhost/mk-board<br/>
                                 본 메일은 MK-Board에서 발송된 것입니다.
                             ";
-                    $result =$this->sendEmail($userEmail, $mailSubject, $mailBody);
+
+                    $result = $this->sendEmail($recipients, $mailSubject, $mailBody);
                     if($result === 'fail') {
                         $this->redirectBack('회원생성 이메일이 보내지지 않았습니다. 이메일을 수동으로 보내주세요.');
                     }
@@ -112,16 +119,17 @@ class UserController extends BaseController {
         $userPhone = $_POST['userPhone'];
 
         $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $departmentInfo = $this->department->getDepartmentName($departmentIdx);
         $new = [
             'userName'=>$userName,
-            'departmentIdx'=>$departmentIdx,
+            'departmentName'=>$departmentInfo['departmentName'],
             'userPhone'=>$userPhone,
         ];
         $new = implode(',', $new);
 
         $og = [
             'userName'=>$nowUser['userName'],
-            'departmentIdx'=>$nowUser['departmentIdx'],
+            'departmentName'=>$nowUser['departmentName'],
             'userPhone'=>$nowUser['userPhone'],
         ];
         $og = implode(',', $og);
@@ -181,7 +189,9 @@ class UserController extends BaseController {
                      <br/>
                      본 메일은 MK-Board에서 발송된 것입니다.
                     ";
-        $result['status'] = $this->sendEmail($userEmail, $mailSubject, $mailBody);
+        $recipients = [];
+        array_push($recipients, $nowUser['userEmail']);
+        $result['status'] = $this->sendEmail($recipients, $mailSubject, $mailBody);
         if($result['status'] === 'success') {
             $result['message'] = '인증번호 전송에 성공하였습니다.';
 
@@ -449,7 +459,10 @@ class UserController extends BaseController {
                                 도메인 주소 : http://localhost/mk-board<br/>
                                 본 메일은 MK-Board에서 발송된 것입니다.
                             ";
-                if($this->sendEmail($userEmail, $mailSubject, $mailBody)) {
+
+                $recipients = [];
+                array_push($recipients, $nowUser['userEmail']);
+                if($this->sendEmail($recipients, $mailSubject, $mailBody) === 'success') {
                     //로깅
                     $this->assembleLogData( userIdx: $nowUser['userIdx'],
                         userName: $nowUser['userName'],

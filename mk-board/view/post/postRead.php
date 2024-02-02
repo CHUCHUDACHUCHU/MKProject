@@ -1,9 +1,7 @@
 <!doctype html>
 <?php
-use Model\Post;
 use Model\Comment;
 use Model\File;
-use Model\User;
 include __DIR__ . '/../part/head.php';
 ?>
 <body>
@@ -16,10 +14,8 @@ include __DIR__ . '/../part/nav.php';
     <div class="container mt-5">
         <?php
         $postIdx = $_GET['postIdx'];
-        $post = new Post();
         $comment = new Comment();
         $file = new File();
-        $user = new User();
 
         $fileDisplay = 'none';
         $contentDisplay = 'none';
@@ -130,6 +126,12 @@ include __DIR__ . '/../part/nav.php';
                 </div>
             </div>
             <hr/>
+
+            <div id="loading-spinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 1000;">
+                <img src="/mk-board/assets/img/spinner.gif" alt="로딩 중..." /> <!-- 스피너 이미지 등을 넣어주세요 -->
+                <b style="display: block">게시글 권한 변경 중...</b>
+            </div>
+
             <?php
             if(isset($postInfo['statusChangerName'])) {
                 ?>
@@ -206,7 +208,11 @@ include __DIR__ . '/../part/nav.php';
                  aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <form action="/mk-board/comment/create" method="post" class="rejectMessageModalForm">
+                        <div id="modal-loading-spinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 1000;">
+                            <img src="/mk-board/assets/img/spinner.gif" alt="로딩 중..." /> <!-- 스피너 이미지 등을 넣어주세요 -->
+                            <b style="display: block">게시글 권한 변경 중...</b>
+                        </div>
+                        <form action="/mk-board/comment/create" method="post" class="rejectMessageModalForm" id="rejectMessageModalForm">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="rejectMessageModalLabel">반려 사유 작성</h5>
                                 <input type="hidden" id="modalPostIdx" name="postIdx" value="">

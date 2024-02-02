@@ -32,7 +32,10 @@ class CommentController extends BaseController{
         $content = $_POST['content'];
 
         $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $nowUserName = $nowUser['userName'];
         $targetPost = $this->post->getPostById($postIdx);
+        $targetUser = $this->user->getUserById($targetPost['userIdx']);
+        $targetUserEmail = $targetUser['userEmail'];
 
         if ($this->parametersCheck($postIdx, $nowUser['userIdx'], $content)) {
             $commentIdx = $this->comment->create($postIdx, $nowUser['userIdx'], $content);
@@ -66,6 +69,26 @@ class CommentController extends BaseController{
                         details: $details);
 
                     $this->post->updateStatus('반려', $nowUser['userIdx'], $postIdx);
+
+                    $recipients = [];
+                    array_push($recipients, $targetUserEmail);
+
+                    $mailSubject = "[MKBoard] 회원님의 게시글 권한이 변경되었습니다!";
+                    $mailBody = "
+                            회원님의 게시글 권한이 <b>반려<b/>으로 변경되었습니다.<br/>
+                            <br/>
+                            <br/>
+                            게시글 번호 : <b>$postIdx<b/><br/>
+                            권한 변경자 : <b>$nowUserName<b/><br/>
+                            반려 사유 : <b>$content</b>
+                            <br/>
+                            <br/>
+                            도메인 주소 : http://localhost/mk-board/post/read?postIdx=$postIdx<br/>
+                            본 메일은 MK-Board에서 발송된 것입니다.
+                        ";
+
+                    $this->sendEmail($recipients, $mailSubject, $mailBody);
+
                     $this->redirectBack('게시글 권한이 반려되었습니다.');
                 } else {
                     $this->redirect('/mk-board/post/read?postIdx=' . $postIdx, '');

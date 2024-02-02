@@ -70,7 +70,7 @@ include __DIR__ . '/../part/nav.php';
                             <div class="col-md-7">
                                 <div class="row">
                                     <a href="/mk-board/user/read?userIdx=<?= $userInfo['userIdx'] ?>" class="card-title" style="font-weight: bolder; cursor: pointer"><?= $userInfo['userName'] ?></a>
-                                    <p class="card-text userEmail" style="font-weight: bold">&nbsp @ <?= $userInfo['userEmail'] ?></p>
+                                    <p class="card-text userEmail" style="font-weight: bold">&nbsp <?= $userInfo['userEmail'] ?></p>
                                 </div>
                             </div>
                             <div class="col-md-3 row justify-content-end">
@@ -170,7 +170,6 @@ include __DIR__ . '/../part/nav.php';
 
                         <button type="submit" class="btn btn-primary float-right"
                                 style="background-color: dodgerblue !important;">사용자 생성</button>
-<!--                        <button type="button" class="btn btn-primary emailAllTest">이메일 전체 전송 테스트</button>-->
                     </form>
                 </div>
             </div>

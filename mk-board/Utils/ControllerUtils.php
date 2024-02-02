@@ -1,6 +1,7 @@
 <?php
 namespace Utils;
 
+use JetBrains\PhpStorm\Pure;
 use Model\Log;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -73,7 +74,7 @@ trait ControllerUtils   {
      * @param $bytes
      * @return string
      */
-    public function formatSizeUnits($bytes): string
+    #[Pure] public function formatSizeUnits($bytes): string
     {
         $units = array('B', 'KB', 'MB', 'GB', 'TB');
         $bytes = max($bytes, 0);
@@ -84,7 +85,7 @@ trait ControllerUtils   {
         return round($bytes, 2) . ' ' . $units[$pow];
     }
 
-    public function sendEmail($userEmail, $subject, $body): string
+    public function sendEmail($recipients, $subject, $body): string
     {
         $mail = new PHPMailer();
         $mail->CharSet = 'UTF-8';
@@ -92,6 +93,7 @@ trait ControllerUtils   {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
+        $mail->SMTPKeepAlive = true;
         $mail->Username = 'yoon7548@gmail.com';
         $mail->Password = 'ellh yjlt wtct vpng';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
@@ -109,8 +111,12 @@ trait ControllerUtils   {
             )
         );
 
-        $mail->setFrom('yoon7548@gmail.com', 'MK-Board');
-        $mail->addAddress($userEmail, $userEmail);
+        $mail->setFrom('yoon7548@gmail.com', 'MK-board');
+
+        // 다중 이메일 주소 추가
+        foreach ($recipients as $recipient) {
+            $mail->addAddress($recipient);
+        }
 
         // 메일 제목, 내용 세팅
         $mail->isHTML(true);

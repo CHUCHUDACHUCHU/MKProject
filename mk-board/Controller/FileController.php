@@ -1,6 +1,5 @@
 <?php
 namespace Controller;
-use JetBrains\PhpStorm\NoReturn;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 
@@ -14,12 +13,15 @@ use Model\User;
 
 class FileController extends BaseController
 {
+    private false|array $config;
     private LocalFilesystemAdapter $adapter;
     private File $file;
     private User $user;
+
     public function __construct()
     {
-        $this->adapter = new LocalFilesystemAdapter('/var/www/html/mk-board/assets/uploads');
+        $this->config = parse_ini_file(__DIR__ . '/../config.ini');
+        $this->adapter = new LocalFilesystemAdapter($this->config['FILE_UPLOAD_PATH']);
         $this->file = new File();
         $this->user = new User();
     }
@@ -68,7 +70,7 @@ class FileController extends BaseController
             if ($filesystem->fileExists($fileName)) {
                 $result = ['fileName' => $fileName , 'fileOriginName' => $fileOriginName, 'fileSize' => $fileSize];
             } else {
-                $result = ['error' => 'Failed to save the file.', 'show' => $_FILES['file']];
+                $result = ['error' => 'Failed to save the file.'];
             }
             $this->echoJson(['result'=>$result]);
         } else {
@@ -119,38 +121,37 @@ class FileController extends BaseController
     /**
      * 파일 다운로드
      */
-    #[NoReturn] public function download() {
-        /* body 값 */
+    public function download() {
         $requestData = json_decode(file_get_contents("php://input"), true);
         $fileIdx = $requestData['fileIdx'];
-
         $targetFile = $this->file->getFileById($fileIdx);
-        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $targetFileName = $targetFile['fileName'];
+        $targetFilePostIdx = $targetFile['postIdx'];
+        $filePath = '/var/www/html/mk-board/assets/uploads/' . $targetFileName;
 
-        if ($targetFile) {
+        $nowUser = $this->user->getUserById($_SESSION['userIdx']);
+        $details = "(fileIdx : " . $fileIdx . ") is connected on (postIdx : " . $targetFilePostIdx . ")";
+
+        if(file_exists($filePath)) {
             //로깅
             $this->assembleLogData( userIdx: $nowUser['userIdx'],
                 userName: $nowUser['userName'],
                 targetIdx: $fileIdx,
                 targetClass: get_class($this),
-                actionFunc: __METHOD__);
+                actionFunc: __METHOD__,
+                details: $details);
 
-            $result = [
-                'status' => 'success',
-                'message' => '파일 정보를 가져올 수 없습니다.',
-                'fileName' => $targetFile['fileName']
-            ];
-        } else {
-            $result = [
-                'status' => 'error',
-                'message' => '파일 정보를 가져올 수 없습니다.'
-            ];
+            // 파일 다운로드를 위한 헤더 설정
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . $targetFileName . '"');
+            header('Content-Length: ' . filesize($filePath));
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+
+            // 파일을 읽어서 출력
+            readfile($filePath);
+            exit();
         }
-
-        echo json_encode(['result' => $result]);
-        exit;
     }
-
 
     /**
      * 기존 파일 삭제 기능을 담당

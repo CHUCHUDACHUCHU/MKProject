@@ -106,7 +106,7 @@ include __DIR__ . '/../part/nav.php';
     const maxUpdateFilesAllowed = maxFilesAllowed - uploadedFileCount;
 
     const dropzone = new Dropzone(".dropzone", {
-        url: "http://localhost/mk-board/file/upload", // 파일을 업로드할 서버 주소 url.
+        url: "/mk-board/file/upload", // 파일을 업로드할 서버 주소 url.
         method: "post",
 
         previewTemplate: previewTemplate,                       // 커스텀 업로드 테마
@@ -116,6 +116,12 @@ include __DIR__ . '/../part/nav.php';
         maxFiles: maxUpdateFilesAllowed,                                            //최대 갯수
         parallelUploads: maxFilesAllowed,                                     //동시 최대 갯수
         maxFilesize: maxFileSize,                                        // 최대업로드용량
+        acceptedFiles:  'image/*, ' +
+            'application/pdf, ' +
+            'application/msword, ' +
+            'application/vnd.ms-excel, ' +
+            'application/vnd.ms-powerpoint, ' +
+            'text/plain, ',
         dictMaxFilesExceeded: `파일 갯수가 너무 많습니다. 최대${maxFilesAllowed}개 입니다.`,
         dictFileTooBig: `${maxFileSize}MB를 초과합니다. 파일을 삭제해주세요.`
 
@@ -124,8 +130,8 @@ include __DIR__ . '/../part/nav.php';
     let uploadedFileIndexes = [];
 
     const updatePostCompleteBtn = document.getElementById('updatePostCompleteBtn');
-    updatePostCompleteBtn.addEventListener('click', function (event) {
-        event.preventDefault();
+    updatePostCompleteBtn.addEventListener('click', function () {
+        const postIdx = document.getElementById('postIdx').value;
         const fileCount = dropzone.files.length;
         const isAllFilesValid = dropzone.files.every(function (file) {
             return file.size <= maxFileSize * 1024 * 1024;
@@ -133,8 +139,8 @@ include __DIR__ . '/../part/nav.php';
 
         if (fileCount <= maxUpdateFilesAllowed && isAllFilesValid) {
             if(fileCount === 0) {
-                // 파일 없을 시 바로 form 제출
-                document.getElementById('myPostUpdateFormGroup').submit();
+                //파일 업로드 할게 없을 땐, false 전달
+                postUpdateFetch(postIdx,false);
             }
             dropzone.processQueue();
         } else {
@@ -148,6 +154,12 @@ include __DIR__ . '/../part/nav.php';
 
     // 파일 업로드 성공 시
     dropzone.on('success', function (file, data) {
+        // 파일 추가 업로드 성공 후의 로직을 여기에 추가
+        console.log('파일 업로드 중 : ', data.result.fileOriginName);
+        fileUpdateFetch(data);
+    });
+
+    function fileUpdateFetch(data) {
         fetch('/mk-board/file/create', {
             method: 'POST',
             headers: {
@@ -174,7 +186,7 @@ include __DIR__ . '/../part/nav.php';
 
                     if (uploadedFileIndexes.length === dropzone.files.length) {
                         console.log('파일 저장 완료!')
-                        updatePostToDB(postIdx);
+                        postUpdateFetch(postIdx, true);
                     }
                 } else {
                     alert(data.result.message);
@@ -183,12 +195,14 @@ include __DIR__ . '/../part/nav.php';
             .catch((err) => {
                 alert('파일 DB 저장 요청 : fetch 에러 ' + err);
             })
-    });
+    }
 
     // 게시글 DB 저장 함수
-    function updatePostToDB(postIdx) {
+    function postUpdateFetch(postIdx, withFile) {
         const title = document.getElementById('title');
         const content = document.getElementById('content');
+
+        console.log('게시글 DB 저장 요청');
         fetch('/mk-board/post/update/fetch', {
             method: 'POST',
             headers: {
@@ -208,8 +222,13 @@ include __DIR__ . '/../part/nav.php';
             })
             .then((data) => {
                 if(data.result.status === 'success') {
-                    console.log('게시글 DB 수정 성공!');
-                    connectFileWithPost(postIdx);
+                    if(withFile) {
+                        console.log('게시글 DB저장 성공!');
+                        connectFileWithPost(postIdx);
+                    } else {
+                        console.log('파일없이 수정 성공!');
+                        location.href=`/mk-board/post/read?postIdx=${postIdx}`;
+                    }
                 } else {
                     alert(data.result.message);
                 }

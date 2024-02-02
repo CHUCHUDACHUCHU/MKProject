@@ -25,4 +25,23 @@ class Department extends BaseModel {
             return [];
         }
     }
+
+    public function getDepartmentName($departmentIdx) {
+        try {
+            $query = "SELECT
+                                d.*
+                        FROM
+                            departments d
+                        WHERE
+                            departmentIdx = :departmentIdx";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                'departmentIdx' => $departmentIdx
+            ]);
+            return $stmt->fetch();
+        } catch (PDOException  $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
 }

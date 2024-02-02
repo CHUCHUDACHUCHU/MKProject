@@ -81,128 +81,136 @@ include __DIR__ . '/../part/nav.php';
             </div>
         </div>
 <hr/>
+    <div id="loading-spinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 1000;">
+        <img src="/mk-board/assets/img/spinner.gif" alt="로딩 중..." /> <!-- 스피너 이미지 등을 넣어주세요 -->
+        <b style="display: block">게시글 권한 변경 중...</b>
+    </div>
+    <div>
+        <!-- 회원 리스트 -->
+        <?php
+        // 현재 페이지 설정 값
+        $currentPage = $_GET['page'] ?? 1;
+        $searchWord = $_GET['search'] ?? '';
+        $postStatus = $_GET['postStatus'] ?? '';
+        $departmentName = $_GET['departmentName'] ?? '';
+
+        // 페이지마다 보여줄 아이템 개수
+        $perPage = 15;
+        // 페이지의 시작 인덱스 값
+        $startIndex = ($currentPage - 1) * $perPage;
+
+        $total = $post->countManagePosts($searchWord, $postStatus, $departmentName);
+
+        // 전체 페이지 개수
+        $totalPage = ceil($total / $perPage);
+
+        // 현재 페이지에서 보여줄 마지막 페이지
+        $endPage = min($totalPage, $currentPage + 4);
+        $endPage = max(1, $endPage);
+
+        // 게시글 전체목록 가져오기
+        $posts = $post->getManagePosts($searchWord, $startIndex, $perPage, $postStatus, $departmentName);
+
+        if($posts) {
+            foreach ($posts as $postInfo) {
+
+                $postStatusColor = '#17a2b8';
+                $tableColor = '#fff';
+                $lockEmoji = '';
+                if ($postInfo['postStatus'] === '대기') {
+                    $postStatusColor = '#ff9800';
+                    $lockEmoji = '🔒';
+                } else if($postInfo['postStatus'] === '반려') {
+                    $postStatusColor = '#dc3545';
+                    $lockEmoji = '🔒';
+                } else if($postInfo['postStatus'] === '공지') {
+                    $postStatusColor = '#6c757d';
+                    $tableColor = 'gainsboro';
+                    $lockEmoji = '🚨';
+                }
 
 
-    <!-- 회원 리스트 -->
-    <?php
-    // 현재 페이지 설정 값
-    $currentPage = $_GET['page'] ?? 1;
-    $searchWord = $_GET['search'] ?? '';
-    $postStatus = $_GET['postStatus'] ?? '';
-    $departmentName = $_GET['departmentName'] ?? '';
+                /// 30 글자 초과시 ... 저리
+                $title = $postInfo["title"];
+                if (strlen($title) > 30) {
+                    // mb_substr: 한글이 깨지지 않도록 해줌
+                    $title = str_replace($postInfo["title"], mb_substr($postInfo["title"], 0, 30, "utf-8") . "...", $postInfo["title"]);
+                }
+                ?>
+                <!-- 게시글 리스트 정보 -->
+                <div class="card mb-2 postInfoDashboard">
+                    <div class="row g-0 align-items-center">
+                        <div class="col-md-10">
+                            <div class="row" style="margin-left: 5px">
+                                <!-- 체크박스 -->
+                                <div class="col-md-1" style="display:none;">
+                                    <p class="postIdx" id="postIdx"><?= $postInfo['postIdx'] ?></p>
+                                </div>
 
-    // 페이지마다 보여줄 아이템 개수
-    $perPage = 20;
-    // 페이지의 시작 인덱스 값
-    $startIndex = ($currentPage - 1) * $perPage;
+                                <!-- 체크박스 -->
+                                <div class="col-md-1">
+                                    <input type="checkbox" name="your_checkbox_name" id="your_checkbox_id">
+                                    <label for="your_checkbox_id"></label>
+                                </div>
 
-    $total = $post->countManagePosts($searchWord, $postStatus, $departmentName);
+                                <!-- 작성자 -->
+                                <div class="col-md-1">
+                                    <div class="row">
+                                        <a href="/mk-board/user/read?userIdx=<?= $postInfo['userIdx'] ?>" class="card-title" style="color: black; font-weight: bolder; cursor: pointer"><?= $postInfo['userName'] ?></a>
+                                    </div>
+                                </div>
 
-    // 전체 페이지 개수
-    $totalPage = ceil($total / $perPage);
+                                <!-- 부서 -->
+                                <div class="col-md-1">
+                                    <p class="card-text" style="font-size: small; font-weight: bolder"><?= $postInfo['departmentName'] ?></p>
+                                </div>
 
-    // 현재 페이지에서 보여줄 마지막 페이지
-    $endPage = min($totalPage, $currentPage + 4);
-    $endPage = max(1, $endPage);
-
-    // 게시글 전체목록 가져오기
-    $posts = $post->getManagePosts($searchWord, $startIndex, $perPage, $postStatus, $departmentName);
-
-    if($posts) {
-        foreach ($posts as $postInfo) {
-
-            $postStatusColor = '#17a2b8';
-            $tableColor = '#fff';
-            $lockEmoji = '';
-            if ($postInfo['postStatus'] === '대기') {
-                $postStatusColor = '#ff9800';
-                $lockEmoji = '🔒';
-            } else if($postInfo['postStatus'] === '반려') {
-                $postStatusColor = '#dc3545';
-                $lockEmoji = '🔒';
-            } else if($postInfo['postStatus'] === '공지') {
-                $postStatusColor = '#6c757d';
-                $tableColor = 'gainsboro';
-                $lockEmoji = '🚨';
-            }
-
-
-            /// 30 글자 초과시 ... 저리
-            $title = $postInfo["title"];
-            if (strlen($title) > 30) {
-                // mb_substr: 한글이 깨지지 않도록 해줌
-                $title = str_replace($postInfo["title"], mb_substr($postInfo["title"], 0, 30, "utf-8") . "...", $postInfo["title"]);
-            }
-            ?>
-            <!-- 게시글 리스트 정보 -->
-            <div class="card mb-2 postInfoDashboard">
-                <div class="row g-0 align-items-center">
-                    <div class="col-md-10">
-                        <div class="row" style="margin-left: 5px">
-                            <!-- 체크박스 -->
-                            <div class="col-md-1" style="display:none;">
-                                <p class="postIdx" id="postIdx"><?= $postInfo['postIdx'] ?></p>
-                            </div>
-
-                            <!-- 체크박스 -->
-                            <div class="col-md-1">
-                                <input type="checkbox" name="your_checkbox_name" id="your_checkbox_id">
-                                <label for="your_checkbox_id"></label>
-                            </div>
-
-                            <!-- 작성자 -->
-                            <div class="col-md-1">
-                                <div class="row">
-                                    <a href="/mk-board/user/read?userIdx=<?= $postInfo['userIdx'] ?>" class="card-title" style="color: black; font-weight: bolder; cursor: pointer"><?= $postInfo['userName'] ?></a>
+                                <!-- 제목 -->
+                                <div class="col-md-8 ml-5">
+                                    <a href="/mk-board/post/read?postIdx=<?= $postInfo['postIdx'] ?>">
+                                        <?php if ($postInfo['postStatus'] !== '승인') { ?>
+                                            <span><?= $lockEmoji ?></span>
+                                        <?php } ?>
+                                        <?= htmlspecialchars($title) . " [" . $postInfo['comment_count'] . "]"; ?>
+                                    </a>
                                 </div>
                             </div>
-
-                            <!-- 부서 -->
-                            <div class="col-md-1">
-                                <p class="card-text" style="font-size: small; font-weight: bolder"><?= $postInfo['departmentName'] ?></p>
-                            </div>
-
-                            <!-- 제목 -->
-                            <div class="col-md-8 ml-5">
-                                <a href="/mk-board/post/read?postIdx=<?= $postInfo['postIdx'] ?>">
-                                    <?php if ($postInfo['postStatus'] !== '승인') { ?>
-                                        <span><?= $lockEmoji ?></span>
-                                    <?php } ?>
-                                    <?= htmlspecialchars($title) . " [" . $postInfo['comment_count'] . "]"; ?>
-                                </a>
-                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-2 row">
-                        <div class="d-flex align-items-center">
-                            <div aria-label="Button group with nested dropdown" class="d-flex align-items-center postStatusBox">
-                                <button type="button" class="btn btn-primary dropdown-toggle" style="background-color: <?=$postStatusColor?> !important; height: 30px; line-height: 15px;" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <?= $postInfo['postStatus'] ?>
-                                </button>
-                                <input type="hidden" class="postIdx" name="postIdx" value="<?= $postInfo['postIdx'] ?>">
-                                <ul class="dropdown-menu" style="cursor: pointer">
-                                    <li><a class="dropdown-item post-status-dropdown-item" data-value="승인">승인</a></li>
-                                    <li><a class="dropdown-item post-status-dropdown-item" data-value="대기">대기</a></li>
-                                    <li><a class="dropdown-item openRejectMessageModal" data-value="반려">반려</a></li>
-                                </ul>
+                        <div class="col-md-2 row">
+                            <div class="d-flex align-items-center">
+                                <div aria-label="Button group with nested dropdown" class="d-flex align-items-center postStatusBox">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" style="background-color: <?=$postStatusColor?> !important; height: 30px; line-height: 15px;" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <?= $postInfo['postStatus'] ?>
+                                    </button>
+                                    <input type="hidden" class="postIdx" name="postIdx" value="<?= $postInfo['postIdx'] ?>">
+                                    <ul class="dropdown-menu" style="cursor: pointer">
+                                        <li><a class="dropdown-item post-status-dropdown-item" data-value="승인">승인</a></li>
+                                        <li><a class="dropdown-item post-status-dropdown-item" data-value="대기">대기</a></li>
+                                        <li><a class="dropdown-item openRejectMessageModal" data-value="반려">반려</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <?php
+                <?php
+            }
+        } else {
+            echo "<tr><td colspan='6' class='text-center'>게시글이 없습니다.</td></tr>";
         }
-    } else {
-        echo "<tr><td colspan='6' class='text-center'>게시글이 없습니다.</td></tr>";
-    }
 
-    ?>
+        ?>
+    </div>
     
     <div class="modal fade" id="rejectMessageModal" tabindex="-1" aria-labelledby="rejectMessageModal"
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="/mk-board/comment/create" method="post" class="rejectMessageModalForm">
+                <div id="modal-loading-spinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 1000;">
+                    <img src="/mk-board/assets/img/spinner.gif" alt="로딩 중..." /> <!-- 스피너 이미지 등을 넣어주세요 -->
+                    <b style="display: block">게시글 권한 변경 중...</b>
+                </div>
+                <form action="/mk-board/comment/create" method="post" class="rejectMessageModalForm" id="rejectMessageModalForm">
                     <div class="modal-header">
                         <h5 class="modal-title" id="rejectMessageModalLabel">반려 사유 작성</h5>
                         <input type="hidden" id="modalPostIdx" name="postIdx" value="">

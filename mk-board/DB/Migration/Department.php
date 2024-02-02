@@ -25,9 +25,9 @@ class Department {
             // 테이블이 존재하지 않으면 테이블 생성
             if (!$checkTableExists) {
                 $createTableSQL = "CREATE TABLE $tableName (
-            departmentIdx   INT AUTO_INCREMENT PRIMARY KEY,
-            departmentName  VARCHAR(10)	NOT NULL
-        )";
+                                        departmentIdx   INT AUTO_INCREMENT PRIMARY KEY,
+                                        departmentName  VARCHAR(10)	NOT NULL
+            )";
                 $this->conn->exec($createTableSQL);
                 echo "Table $tableName created successfully\n";
             } else {

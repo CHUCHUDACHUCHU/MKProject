@@ -66,7 +66,7 @@ include __DIR__ . '/../part/head.php';
                     </div>
                     </br>
                     <span style="font-size: small; font-weight: bolder">!!!임시 알림!!!</span><br>
-                    <span style="font-size: small; font-weight: bolder">체험용 관리자 계정[아이디 : admin, 비밀번호 : c]로 로그인하실 수 있습니다.</span><br>
+                    <span style="font-size: small; font-weight: bolder">체험용 관리자 계정 [아이디 : chu.gyoyoon@mkinternet.com, 비밀번호 : c]</span><br>
                     <span style="font-size: small; font-weight: bolder; color: #ff9800">알림</span>
                     <ul>
                         <li>담당자(추교윤)에게 계정생성을 요청하세요.</li>

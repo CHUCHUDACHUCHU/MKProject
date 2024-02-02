@@ -30,20 +30,10 @@ class PostRoute extends BaseRoute {
             return $this->requireView('post', 'postManage');
         }
 
-        
-        // 게시글 생성 요청(파일 업로드 없을 시 : 추후 Form, Fetch 합치는 refactoring 필요)
-        else if ($this->routeCheck($url, "post/create/form", "POST")) {
-            $PostController->createByForm();
-            return true;
 
-        // 게시글 생성 요청(파일 업로드 시 : 추후 Form, Fetch 합치는 refactoring 필요)
-        } else if ($this->routeCheck($url, "post/create/fetch", "POST")) {
+        // 게시글 생성 요청
+        else if ($this->routeCheck($url, "post/create/fetch", "POST")) {
             $PostController->createByFetch();
-            return true;
-            
-        // 게시글 수정 요청(파일 업로드 없을 시 : 추후 Form, Fetch 합치는 refactoring 필요)
-        }  else if ($this->routeCheck($url, "post/update/form", "POST")) {
-            $PostController->updateByForm();
             return true;
 
         // 게시글 수정 요청(파일 업로드 시 : 추후 Form, Fetch 합치는 refactoring 필요)
