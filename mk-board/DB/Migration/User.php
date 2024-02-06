@@ -59,14 +59,14 @@ class User
             $passwordInit = $this->config['PASSWORD_INIT'];
             $userPw = crypt($passwordInit, $salt);
 
-            // 테이블이 존재하는지 확인
             $checkAdminExists = $this->conn->query("SELECT * FROM users WHERE userName='admin'")->rowCount() > 0;
 
-            // 테이블이 존재하면 user 생성
             if (!$checkAdminExists) {
                 $createAdmin = "INSERT INTO users (userName, userEmail, userPw, departmentIdx, userStatus, userInit, userPhone)
-				VALUES('admin', 'admin', '$5\$QOPrAVIK\$DYLrEDaHzs7xbp5xEAOsyQzL6cKJManpc3JK/Q8GeE0', 7, '관리자', '1', '010-6630-7548');";
-                $this->conn->exec($createAdmin);
+                                            VALUES('admin', 'admin', :userPw, 7, '관리자', '1', '010-6630-7548');";
+                $stmt = $this->conn->prepare($createAdmin);
+                $stmt->bindParam('userPw', $userPw);
+                $stmt->execute();
                 echo "Admin user created successfully\n";
             } else {
                 echo "Admin user already exists\n";

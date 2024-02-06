@@ -5,14 +5,17 @@ FROM ubuntu/apache2:2.4-22.04_beta
 RUN apt-get update && \
     apt-get install -y composer nano php-mysql libapache2-mod-php
 
-## apache2.conf 파일 수정 (Directory 설정 변경)
-#RUN sed -i '/<Directory \/var\/www>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
-#
-## 000-default.conf 파일 수정 (ServerName 주석 해제)
-#RUN sed -i 's/#ServerName www.example.com/ServerName localhost/g' /etc/apache2/sites-available/000-default.conf
+# Apache2 설정 파일 수정
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
+# 파일의 가장 아래에 ServerName localhost 추가
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Rewrite 모듈 활성화
 RUN a2enmod rewrite
 
-# Apache 서비스 재시작 및 /var/www/html/mk-board 디렉토리로 이동하여 composer install 실행
-CMD service apache2 start && cd /var/www/html/mk-board && composer install --no-interaction --quiet && tail -f /dev/null
+# 작업 디렉토리 설정
+WORKDIR /var/www/html/mk-board
+
+# Composer install 및 PHP Migration 파일 실행
+CMD composer install --no-interaction --quiet && php DB/Migration.php && apache2-foreground

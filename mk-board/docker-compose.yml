@@ -3,13 +3,10 @@ version: '3'
 services:
   mysql:
     image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: "DAew0907!0515"
-      MYSQL_DATABASE: "MKBoardDB"
-      MYSQL_USER: "chu"
-      MYSQL_PASSWORD: "DAew0907!0515"
+    env_file:
+      - ./dockerConf.ini
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
 
@@ -18,7 +15,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8060:80"
     volumes:
       - ./:/var/www/html/mk-board
     depends_on:

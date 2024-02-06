@@ -154,14 +154,13 @@ class Post extends BaseModel {
      * Post 목록의 개수(어드민 메인페이지)
      * @param string $search
      * @param string $departmentName
-     * @return int|mixed
+     * @return int
      */
     public function countMainPostsByAdmin(string $search, string $departmentName): int
     {
         try {
             $query = "SELECT count(p.postIdx) 
                         FROM posts p 
-                        JOIN departments d ON u.departmentIdx = d.departmentIdx
                         WHERE title like :search 
                           and p.postStatus = '승인'
                           and p.deleted_at is null";
