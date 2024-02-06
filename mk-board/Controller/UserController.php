@@ -202,6 +202,7 @@ class UserController extends BaseController {
             // 세션에 새로운 인증번호와 현재 시간 저장
             $_SESSION['verification_code'] = $verificationCode;
             $_SESSION['verification_time'] = time();
+            $_SESSION['codeCheck'] = 0;
 
             //로깅
             $this->assembleLogData( actionType: "GET",
@@ -235,6 +236,8 @@ class UserController extends BaseController {
             if($_SESSION['verification_code'] == $code) {
                 $result['status'] = 'success';
                 $result['message'] = '확인되었습니다.';
+                $_SESSION['codeCheck'] = 1;
+                $_SESSION['verification_time'] = time();
             } else {
                 $result['status'] = 'fail';
                 $result['message'] = '인증번호가 일치하지 않습니다.';
@@ -441,15 +444,22 @@ class UserController extends BaseController {
         /* body 값*/
         $requestData = json_decode(file_get_contents("php://input"), true);
         $userEmail = $requestData['userEmail'];
+        $result = [
+            'status' => '',
+            'message' => ''
+        ];
+
+        if($_SESSION['codeCheck'] !== 1 || (time()-$_SESSION['verification_time']) >= 5) {
+            $result['status'] = 'fail';
+            $result['message'] = '인증번호가 확인되지 않습니다. 다시 확인해주세요.';
+            $this->echoJson(['result' => $result]);
+            return;
+        }
 
         $salt = $this->config['PASSWORD_SALT'];
         $passwordInit = $this->config['PASSWORD_INIT'];
         $changePassword = crypt($passwordInit, $salt);
 
-        $result = [
-            'status' => '',
-            'message' => ''
-        ];
         $nowUser = $this->user->getUserByEmail($userEmail);
 
         if($this->parametersCheck($userEmail, $changePassword)) {

@@ -8,11 +8,13 @@ use PDOException;
 class User
 {
     private $conn;
+    private false|array $config;
 
     public function __construct()
     {
         $this->conn = new connection();
         $this->conn = $this->conn->getConnection();
+        $this->config = parse_ini_file(__DIR__ . '/../../config.ini');
     }
 
     function migrate()
@@ -42,6 +44,32 @@ class User
                 echo "Table $tableName created successfully\n";
             } else {
                 echo "Table $tableName already exists\n";
+            }
+        } catch
+        (PDOException $e) {
+            echo "Connection failed: " . $e->getMessage()."\n";
+        }
+    }
+
+    function createAdmin() {
+        try {
+            $tableName = "users";
+
+            $salt = $this->config['PASSWORD_SALT'];
+            $passwordInit = $this->config['PASSWORD_INIT'];
+            $userPw = crypt($passwordInit, $salt);
+
+            // 테이블이 존재하는지 확인
+            $checkAdminExists = $this->conn->query("SELECT * FROM users WHERE userName='admin'")->rowCount() > 0;
+
+            // 테이블이 존재하면 user 생성
+            if (!$checkAdminExists) {
+                $createAdmin = "INSERT INTO users (userName, userEmail, userPw, departmentIdx, userStatus, userInit, userPhone)
+				VALUES('admin', 'admin', '$5\$QOPrAVIK\$DYLrEDaHzs7xbp5xEAOsyQzL6cKJManpc3JK/Q8GeE0', 7, '관리자', '1', '010-6630-7548');";
+                $this->conn->exec($createAdmin);
+                echo "Admin user created successfully\n";
+            } else {
+                echo "Admin user already exists\n";
             }
         } catch
         (PDOException $e) {

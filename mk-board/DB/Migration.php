@@ -30,6 +30,8 @@ class Migration
         $this->department->migrate();
         $this->file->migrate();
         $this->log->migrate();
+        $this->user->createAdmin();
+        $this->department->createDefaultDepartment();
         echo "[Migration End]\n";
     }
 }

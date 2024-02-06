@@ -265,11 +265,11 @@ document.addEventListener('DOMContentLoaded', function (event) {
     const resetPasswordBtn = document.querySelector('.resetPasswordBtn');
     if(resetPasswordBtn) {
         resetPasswordBtn.addEventListener('click', function () {
-            loadingSpinner.style.display = 'block';
             if(codeCheck === 0) {
                 alert('인증번호를 확인해주세요.');
             } else {
                 const email = document.getElementById('email');
+                loadingSpinner.style.display = 'block';
                 fetch(`/mk-board/user/reset/password`, {
                     method: 'POST',
                     headers: {
@@ -291,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                             location.href='/mk-board';
                         } else {
                             alert(data.result.message);
+                            location.reload();
                         }
                     })
                     .catch((err) => {

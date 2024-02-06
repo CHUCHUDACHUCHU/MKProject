@@ -9,7 +9,7 @@ use Model\User;
  */
 
 class AccessController extends BaseController{
-    private $user;
+    private User $user;
 
     public function __construct() {
         $this->user = new User();
