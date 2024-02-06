@@ -18,4 +18,8 @@ RUN a2enmod rewrite
 WORKDIR /var/www/html/mk-board
 
 # Composer install 및 PHP Migration 파일 실행
-CMD composer install --no-interaction --quiet && php DB/Migration.php && apache2-foreground
+CMD ["bash", "-c", "composer install --no-interaction --quiet && apache2-foreground"]
+
+#추후 mysql컨테이너가 docker라는 사용자, MKBoardDB 생성하고 나서
+#완전히 준비가 되고 나서 php DB/Migration.php 명령어가 실행 될 수 있도록 수정하면 더 좋을 듯!
+#지금은 도커 컴포즈 다 돌아가고 좀 있다가 직접 apache2컨테이너 접속해서 직접 php 명령어 실행해야 해,,
