@@ -100,17 +100,6 @@ trait ControllerUtils   {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $config['SMTP_PORT'];
         $mail->Timeout = 10;
-        $keyPath = $config['SSL_KEY_PATH'];
-        $certPath = $config['SSL_CERT_PATH'];
-        $mail->SMTPOptions = array(
-            'ssl' => array(
-                'local_cert' => $certPath,
-                'local_pk' => $keyPath,
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true,
-            )
-        );
 
         $mail->setFrom($config['SMTP_EMAIL'], 'MKBoard');
 

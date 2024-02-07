@@ -61,10 +61,6 @@ SMTP_PASSWORD = "" //smtp 비밀번호 => 구글에 구글 smtp 계정 검색
 
 SMTP_PORT = 587
 
-SSL_KEY_PATH = "/etc/ssl/private/my-ssl-cert.key"
-
-SSL_CERT_PATH = "/etc/ssl/certs/my-ssl-cert.pem"
-
 SCHEDULER_LOG_PATH = "/var/www/html/mk-board/assets/cron/deleteDB.log"
 
 <br/>
