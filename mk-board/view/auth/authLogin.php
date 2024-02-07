@@ -66,12 +66,12 @@ include __DIR__ . '/../part/head.php';
                     </div>
                     </br>
                     <span style="font-size: small; font-weight: bolder">!!!임시 알림!!!</span><br>
-                    <span style="font-size: small; font-weight: bolder">체험용 관리자 계정 [아이디 : chu.gyoyoon@mkinternet.com, 비밀번호 : c]</span><br>
+                    <span style="font-size: small; font-weight: bolder">초기 관리자 계정 [아이디 : admin, 비밀번호 : MKBoard1234]</span><br>
                     <span style="font-size: small; font-weight: bolder; color: #ff9800">알림</span>
                     <ul>
-                        <li>담당자(추교윤)에게 계정생성을 요청하세요.</li>
-                        <li>담당자에게 네이트온으로 이메일 주소를 보내주시면 </li>
+                        <li>담당자(admin)에게 계정생성을 요청하세요.</li>
                         <li>체험용 일반 계정을 생성해드립니다.</li>
+                        <li>추후 실제 사용 시 이 부분은 제거하시오.</li>
                     </ul>
                 </div>
             </div>

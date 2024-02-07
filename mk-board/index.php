@@ -9,7 +9,6 @@ use Route\CommentRoute;
 use Route\FileRoute;
 use Route\LogRoute;
 use Route\EmailRoute;
-use Route\TestRoute;
 
 
 // Start session
@@ -27,8 +26,7 @@ $routes = [
     new CommentRoute(),
     new FileRoute(),
     new LogRoute(),
-    new EmailRoute(),
-    new TestRoute()
+    new EmailRoute()
 ];
 
 $routeMatched = false;

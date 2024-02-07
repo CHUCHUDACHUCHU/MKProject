@@ -33,6 +33,7 @@ class Log {
                                         actionFunc VARCHAR(100) DEFAULT NULL,
                                         actionType VARCHAR(20) DEFAULT NULL,
                                         updateStatus VARCHAR (10) DEFAULT NULL,
+                                        details VARCHAR(500) DEFAULT NULL,
                                         created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )";
                 $this->conn->exec($createTableSQL);
