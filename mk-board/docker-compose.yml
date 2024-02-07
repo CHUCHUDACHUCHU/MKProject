@@ -19,7 +19,6 @@ services:
       - ./:/var/www/html/mk-board
     depends_on:
       - mysql
-    hostname: mk-board-apache2
 
 volumes:
   mysql-data:
