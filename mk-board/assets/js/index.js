@@ -86,20 +86,20 @@ document.addEventListener('DOMContentLoaded', function (event) {
     if(verificationCodeSendBtn) {
         verificationCodeSendBtn.addEventListener('click', function () {
             const expEmailText = /^[A-Za-z0-9\.\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z0-9\.\-]+$/;
-            const email = document.getElementById('email');
+            const userEmail = document.getElementById('email');
             if (codeCheck === 1) {
                 alert('인증이 완료되었습니다.');
                 return false;
             }
 
-            if (email.value == '') {
+            if (userEmail.value == '') {
                 alert("이메일을 입력해주세요.");
-                email.focus();
+                userEmail.focus();
                 return false;
             }
-            if (!expEmailText.test(email.value)) {
+            if (!expEmailText.test(userEmail.value)) {
                 alert('이메일 형식이 올바르지 않습니다.');
-                email.focus();
+                userEmail.focus();
                 return false;
             }
 
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    userEmail: email.value,
+                    userEmail: userEmail.value,
                 })
             })
                 .then((res) => {
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                email: email.value,
+                                userEmail: userEmail.value,
                             }),
                         })
                             .then((res) => {
