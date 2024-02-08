@@ -15,7 +15,7 @@ use Route\EmailRoute;
 session_start();
 
 // Get URL
-$url = isset($_GET['url']) ? $_GET['url'] : '/';
+$url = $_GET['url'] ?? '/';
 
 $access = new AccessController();
 $access->accessFilter($url);

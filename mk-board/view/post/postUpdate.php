@@ -12,85 +12,96 @@ include __DIR__ . '/../part/head.php';
 <body>
 <?php
 include __DIR__ . '/../part/nav.php';
-?>
-<div class="m-4">
-    <div class="container mt-5">
-        <h4 class="d-inline">view/updatePost 파일!!!</h4>
-        <p class="mt-1">글을 수정하는 공간입니다.</p>
+if(!$postInfo) {
+    echo "<script>
+            alert('존재하지 않는 게시글입니다!!');
+            history.back();
+          </script>";
+} else {
+    ?>
 
-        <form action="/mk-board/post/update/form" method="post" class="myPostUpdateFormGroup" id="myPostUpdateFormGroup">
-            <div class="form-group">
-                <input type="hidden" id="postIdx" name="postIdx" value="<?= $_GET['postIdx'] ?>">
-                <input type="text" class="form-control mb-2" id="title" name="title" placeholder="제목을 입력하세요" value="<?= $postInfo['title'] ?>">
-                <input type="text" class="form-control" value="<?= $nowUser['userEmail'] ?>" readonly>
-            </div>
+    <div class="m-4">
+        <div class="container mt-5">
+            <h4 class="d-inline">view/updatePost 파일!!!</h4>
+            <p class="mt-1">글을 수정하는 공간입니다.</p>
 
-            <!--            드롭존-->
-            <div class="dropzone"></div>
-            <ul class="list-unstyled mb-0">
-                <!-- 기존에 업로드된 파일 목록 표시 -->
-                <?php
-                $fileList = $file->getAllFilesByPostIdx($postInfo['postIdx']);
-                foreach ($fileList as $file): ?>
-                    <li class="mt-2" id="dropzone-preview-uploaded-list">
+            <form action="/mk-board/post/update/form" method="post" class="myPostUpdateFormGroup" id="myPostUpdateFormGroup">
+                <div class="form-group">
+                    <input type="hidden" id="postIdx" name="postIdx" value="<?= $_GET['postIdx'] ?>">
+                    <input type="text" class="form-control mb-2" id="title" name="title" placeholder="제목을 입력하세요" value="<?= $postInfo['title'] ?>">
+                    <input type="text" class="form-control" value="<?= $nowUser['userEmail'] ?>" readonly>
+                </div>
+
+                <!--            드롭존-->
+                <div class="dropzone"></div>
+                <ul class="list-unstyled mb-0">
+                    <!-- 기존에 업로드된 파일 목록 표시 -->
+                    <?php
+                    $fileList = $file->getAllFilesByPostIdx($postInfo['postIdx']);
+                    foreach ($fileList as $file): ?>
+                        <li class="mt-2" id="dropzone-preview-uploaded-list">
+                            <!-- This is used as the file preview template -->
+                            <div class="border rounded-3">
+                                <div class="d-flex align-items-center p-2">
+                                    <div class="flex-grow-1">
+                                        <div class="pt-1 uploaded-file-info-box" data-file-idx="<?= $file['fileIdx'] ?>">
+                                            <h6 class="font-semibold mb-1"> <?= $file['fileOriginName'] ?></h6>
+                                            <p class="text-sm text-muted fw-normal"><?= $file['fileSize'] ?></p>
+                                            <strong class="error text-danger" data-dz-errormessage="data-dz-errormessage"></strong>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0 ms-3">
+                                        <button data-dz-remove="data-dz-remove" class="btn btn-sm btn-danger deleteFileBtn">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+
+                <hr/>
+
+                <!-- 포스팅 - 이미지/동영상 dropzone 영역 -->
+                <ul class="list-unstyled mb-0" id="dropzone-preview">
+                    <li class="mt-2" id="dropzone-preview-list">
                         <!-- This is used as the file preview template -->
                         <div class="border rounded-3">
                             <div class="d-flex align-items-center p-2">
+                                <div class="flex-shrink-0 me-3" style="margin-right: 10px">
+                                    <div class="width-8 h-auto rounded-3">
+                                        <img data-dz-thumbnail="data-dz-thumbnail" class="w-full h-auto rounded-3 block" src="#" style="width: 120px;"/>
+                                    </div>
+                                </div>
                                 <div class="flex-grow-1">
-                                    <div class="pt-1 uploaded-file-info-box" data-file-idx="<?= $file['fileIdx'] ?>">
-                                        <h6 class="font-semibold mb-1"> <?= $file['fileOriginName'] ?></h6>
-                                        <p class="text-sm text-muted fw-normal"><?= $file['fileSize'] ?></p>
+                                    <div class="pt-1">
+                                        <span class="badge badge-primary">new</span>
+                                        <h6 class="font-semibold mb-1" data-dz-name="data-dz-name">&nbsp;</h6>
+                                        <p class="text-sm text-muted fw-normal" data-dz-size="data-dz-size"></p>
                                         <strong class="error text-danger" data-dz-errormessage="data-dz-errormessage"></strong>
                                     </div>
                                 </div>
                                 <div class="shrink-0 ms-3">
-                                    <button data-dz-remove="data-dz-remove" class="btn btn-sm btn-danger deleteFileBtn">Delete</button>
+                                    <button data-dz-remove="data-dz-remove" class="btn btn-sm btn-danger">Delete</button>
                                 </div>
                             </div>
                         </div>
                     </li>
-                <?php endforeach; ?>
-            </ul>
+                </ul>
 
-            <hr/>
+                <div class="form-group">
+                    <hr/>
+                    <textarea class="form-control" id="content" name="content" rows="10" placeholder="내용을 입력하세요"><?= $postInfo['content'] ?></textarea>
+                </div>
 
-            <!-- 포스팅 - 이미지/동영상 dropzone 영역 -->
-            <ul class="list-unstyled mb-0" id="dropzone-preview">
-                <li class="mt-2" id="dropzone-preview-list">
-                    <!-- This is used as the file preview template -->
-                    <div class="border rounded-3">
-                        <div class="d-flex align-items-center p-2">
-                            <div class="flex-shrink-0 me-3" style="margin-right: 10px">
-                                <div class="width-8 h-auto rounded-3">
-                                    <img data-dz-thumbnail="data-dz-thumbnail" class="w-full h-auto rounded-3 block" src="#" style="width: 120px;"/>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="pt-1">
-                                    <span class="badge badge-primary">new</span>
-                                    <h6 class="font-semibold mb-1" data-dz-name="data-dz-name">&nbsp;</h6>
-                                    <p class="text-sm text-muted fw-normal" data-dz-size="data-dz-size"></p>
-                                    <strong class="error text-danger" data-dz-errormessage="data-dz-errormessage"></strong>
-                                </div>
-                            </div>
-                            <div class="shrink-0 ms-3">
-                                <button data-dz-remove="data-dz-remove" class="btn btn-sm btn-danger">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
+                <button type="button" class="btn btn-primary" id="updatePostCompleteBtn">완료</button>
+            </form>
+        </div>
 
-            <div class="form-group">
-                <hr/>
-                <textarea class="form-control" id="content" name="content" rows="10" placeholder="내용을 입력하세요"><?= $postInfo['content'] ?></textarea>
-            </div>
-
-            <button type="button" class="btn btn-primary" id="updatePostCompleteBtn">완료</button>
-        </form>
     </div>
 
-</div>
+<?php
+}
+?>
 </body>
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />

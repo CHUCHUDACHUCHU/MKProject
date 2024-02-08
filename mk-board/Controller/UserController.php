@@ -32,6 +32,7 @@ class UserController extends BaseController {
             'message' => ''
         ];
 
+        //userInit이 없으면~ 이건 비밀번호 초기화
         if(!isset($_SESSION['userInit'])) {
             if(!$this->user->getUserByEmail($userEmail)) {
                 $result['status'] = 'userNotFound';
@@ -40,6 +41,7 @@ class UserController extends BaseController {
                 return;
             }
         }
+        //userInit 있으면~ 이건 이메일변경
         if(isset($_SESSION['userInit'])) {
             if($this->user->getUserByEmail($userEmail)) {
                 $result['status'] = 'userAlreadyExist';
@@ -48,6 +50,7 @@ class UserController extends BaseController {
                 return;
             }
         }
+        //3분 안에 또 요청?
         if (isset($_SESSION['verification_code']) && isset($_SESSION['verification_time']) && (time() - $_SESSION['verification_time']) <= 180) {
             $result['status'] = 'codeExist';
             $result['message'] = '인증번호가 이미 전송되었습니다. 3분 후 다시 시도해주세요.';
@@ -175,7 +178,7 @@ class UserController extends BaseController {
     {
         /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
-        $userEmail = $requestData['email'];
+        $userEmail = $requestData['userEmail'];
         $result = [
             'status' => '',
             'message' => ''
@@ -200,6 +203,7 @@ class UserController extends BaseController {
             $result['message'] = '인증번호 전송에 성공하였습니다.';
 
             // 세션에 새로운 인증번호와 현재 시간 저장
+            $_SESSION['userEmail'] = $userEmail;
             $_SESSION['verification_code'] = $verificationCode;
             $_SESSION['verification_time'] = time();
             $_SESSION['codeCheck'] = 0;
@@ -251,6 +255,8 @@ class UserController extends BaseController {
      */
     public function sessionout() {
         unset($_SESSION['verification_code']);
+        unset($_SESSION['verification_time']);
+        unset($_SESSION['userEmail']);
     }
 
 
