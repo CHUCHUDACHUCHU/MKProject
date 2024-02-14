@@ -44,7 +44,7 @@ include __DIR__ . '/../part/nav.php';
             if($nowUser['userStatus'] === '관리자') {
                 // 1-1. 본인글 => 공지글~
                 if($_SESSION['userIdx'] == $postInfo['userIdx']) {
-                    $fileDisplay = 'block';
+                    $fileDisplay = 'compact';
                     $contentDisplay = 'block';
                     $updatePostDisplay = 'block';
                     $deletePostDisplay = 'block';
@@ -52,7 +52,7 @@ include __DIR__ . '/../part/nav.php';
 
                     // 1-2. 다른 일반 글 => 상태관리 가능.
                 } else {
-                    $fileDisplay = 'block';
+                    $fileDisplay = 'compact';
                     $contentDisplay = 'block';
                     $changePostStatusDisplay = 'block';
                     $commentCreateDisplay = 'block';
@@ -65,7 +65,7 @@ include __DIR__ . '/../part/nav.php';
                 if($_SESSION['userIdx'] == $postInfo['userIdx']) {
                     // 1-1. 승인
                     if($postInfo['postStatus'] === '승인') {
-                        $fileDisplay = 'block';
+                        $fileDisplay = 'compact';
                         $contentDisplay = 'block';
                         $deletePostDisplay = 'block';
                         $commentCreateDisplay = 'block';

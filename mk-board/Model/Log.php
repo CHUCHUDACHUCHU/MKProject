@@ -25,10 +25,11 @@ class Log extends BaseModel {
     public function create($actionType, $userIdx, $userName, $targetIdx, $targetClass, $actionFunc, $updateStatus, $details): bool
     {
         try {
-            $query = "INSERT INTO logs (actionType, userIdx, userName, targetIdx, targetClass, actionFunc, updateStatus, details) 
-                                VALUES (:actionType, :userIdx, :userName, :targetIdx, :targetClass, :actionFunc, :updateStatus, :details)";
+            $query = "INSERT INTO logs (ip, actionType, userIdx, userName, targetIdx, targetClass, actionFunc, updateStatus, details) 
+                                VALUES (:ip, :actionType, :userIdx, :userName, :targetIdx, :targetClass, :actionFunc, :updateStatus, :details)";
             return $this->conn->prepare($query)->execute([
                 'userIdx' => $userIdx,
+                'ip' => $_SERVER['REMOTE_ADDR'],
                 'userName' => $userName,
                 'targetIdx' => $targetIdx,
                 'targetClass' => $targetClass,

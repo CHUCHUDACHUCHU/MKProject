@@ -60,6 +60,7 @@ include __DIR__ . '/../part/nav.php';
             <thead class="text-center">
             <tr>
                 <th scope="col" style="width: 15%">날짜</th>
+                <th scope="col" style="width: 15%">IP</th>
                 <th scope="col" style="width: 5%">userIdx</th>
                 <th scope="col" style="width: 10%">userName</th>
                 <th scope="col" style="width: 5%">targetIdx</th>
@@ -90,9 +91,10 @@ include __DIR__ . '/../part/nav.php';
                     }
                     ?>
 
-                    <tr class="text-center logList">
+                    <tr style="height: 43px !important;" class="text-center logList">
                         <td style="display: none" class="logIdx"><?= $logInfo['logIdx'] ?></td>
                         <td><?= $logInfo['created_at'] ?></td>
+                        <td><?= $logInfo['ip'] ?></td>
                         <td><?= $logInfo['userIdx'] ?></td>
                         <td><?= $logInfo['userName'] ?></td>
                         <td><?= $logInfo['targetIdx'] ?></td>

@@ -81,8 +81,7 @@ class FileController extends BaseController
     public function connectFileWithPost() {
         /* body 값 */
         $requestData = json_decode(file_get_contents("php://input"), true);
-        $uploadedFileIndexes = $requestData['uploadedFileIndexes'];
-        $uploadedFileIndexes = array_map('intval', $uploadedFileIndexes);
+        $uploadedFileIndexes = array_map('intval', $requestData['uploadedFileIndexes']);
         $postIdx = $requestData['postIdx'];
 
         $result = [
