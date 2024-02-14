@@ -233,6 +233,9 @@ class UserController extends BaseController {
             'status' => '',
             'message' => ''
         ];
+
+        //들어오자마자 지금 해당 verification_time이 3분이 넘었는지 확인하면 좋을 듯!
+
         if(!isset($_SESSION['verification_code'])) {
             $result['status'] = 'expire';
             $result['message'] = '인증번호 세션이 만료되었습니다.';
@@ -241,6 +244,7 @@ class UserController extends BaseController {
                 $result['status'] = 'success';
                 $result['message'] = '확인되었습니다.';
                 $_SESSION['codeCheck'] = 1;
+                // 여기서는 이제 인증한 시간으로 바꿔줌!
                 $_SESSION['verification_time'] = time();
             } else {
                 $result['status'] = 'fail';
@@ -258,7 +262,7 @@ class UserController extends BaseController {
         unset($_SESSION['verification_time']);
         unset($_SESSION['userEmail']);
 
-        $this->echoJson(['result' => 'success']);
+        $this->echoJson(['result' => ['status' => 'success', 'message' => '인증번호 시간 만료!']]);
     }
 
 
@@ -457,10 +461,9 @@ class UserController extends BaseController {
             'message' => ''
         ];
 
-        if($_SESSION['codeCheck'] !== 1 || (time()-$_SESSION['verification_time']) >= 5) {
-            $result['status'] = 'fail';
-            $result['message'] = '인증번호가 확인되지 않습니다. 다시 확인해주세요.';
-            $this->echoJson(['result' => $result]);
+        // 인증완료한 시간이 3분이 넘으면 그건 인증을 완료했어도 초기화버튼을 누르지 않아서 인증번호시간 만료!
+        if($_SESSION['codeCheck'] !== 1 || (time()-$_SESSION['verification_time']) >= 300) {
+            $this->sessionout();
             return;
         }
 
@@ -484,7 +487,7 @@ class UserController extends BaseController {
                             ";
 
                 $recipients = [];
-                array_push($recipients, $nowUser['userEmail']);
+                $recipients[] = $nowUser['userEmail'];
                 if($this->sendEmail($recipients, $mailSubject, $mailBody) === 'success') {
                     //로깅
                     $this->assembleLogData( userIdx: $nowUser['userIdx'],
