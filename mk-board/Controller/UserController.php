@@ -257,6 +257,8 @@ class UserController extends BaseController {
         unset($_SESSION['verification_code']);
         unset($_SESSION['verification_time']);
         unset($_SESSION['userEmail']);
+
+        $this->echoJson(['result' => 'success']);
     }
 
 
