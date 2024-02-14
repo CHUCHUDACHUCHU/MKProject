@@ -76,12 +76,11 @@ class AccessController extends BaseController{
 
         if (empty($url) || $url == '/') {
             $this->redirect('/mk-board/auth/login', '');
-        } else if ($url == 'auth/login' && isset($_SESSION['userIdx'])) {
+        } else if ($url == 'auth/login' && isset($_SESSION['userIdx']) && $_SERVER['REQUEST_METHOD'] == 'GET') {
             $this->redirect('/mk-board/post/list', '');
         } else if(!isset($_SESSION['userIdx'])) {
             if(!in_array($url, $loginPossibleUrl)) {
                 $this->redirect('/mk-board/auth/login', '로그인이 필요합니다.');
-                return;
             }
         } else {
             $nowUser = $this->user->getUserByIdIncludeDeleted($_SESSION['userIdx']);
@@ -99,7 +98,6 @@ class AccessController extends BaseController{
             }
             if($nowUser['userStatus'] === '일반' && in_array($url, $commonUserImpossibleUrl)) {
                 $this->redirect('/mk-board/', '접근할 수 없는 권한입니다.');
-                return;
             }
         }
     }

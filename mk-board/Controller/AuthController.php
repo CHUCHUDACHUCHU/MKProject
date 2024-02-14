@@ -24,6 +24,10 @@ class AuthController extends BaseController{
      * 이후 홈화면으로 이동
      */
     public function login() {
+        if(isset($_SESSION['userIdx'])) {
+            $this->echoJson(['result' => ['status' => 'fail', 'message' => '이미 로그인 되어있습니다.']]);
+            return;
+        }
         /* body 값 */
         $userEmail = $_POST['userEmail'];
         $userPw = $_POST['userPw'];
