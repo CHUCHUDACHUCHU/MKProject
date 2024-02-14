@@ -25,6 +25,8 @@
 
 📒 [프로젝트 이슈](https://shining-pantydraco-45f.notion.site/a3b77c1569784f96b769f3fb877955a9?pvs=25)
 
+📒 [포스트맨 요청 목록](https://github.com/CHUCHUDACHUCHU/MKProject/mk-board/MKBoard.postman_collection.json)
+
 <hr/>
 
 ### 프로젝트 실행 방법
