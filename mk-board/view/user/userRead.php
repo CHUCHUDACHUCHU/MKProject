@@ -19,7 +19,7 @@ include __DIR__ . '/../part/nav.php';
         <div class="col-md-3">
             <h3>My Information</h3>
             <img src="/mk-board/assets/img/logo.png" alt="Profile Image" class="img-fluid mb-3">
-            <form action="/mk-board/user/update/all" method="post">
+            <form action="/mk-board/user/update/info" method="post">
                 <div class="form-group mb-1">
                     <label>userName</label>
                     <input type="text" class="form-control"  value="<?=$requireUser['userName']?>" name="userName" readonly>

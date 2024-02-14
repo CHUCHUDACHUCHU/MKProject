@@ -59,7 +59,7 @@ class UserRoute extends BaseRoute {
             return true;
             
         // 회원 개인정보 수정 요청
-        } else if($this->routeCheck($url, "user/update/all", "POST")) {
+        } else if($this->routeCheck($url, "user/update/info", "POST")) {
             $UserController->updateMyInfo();
             return true;
             

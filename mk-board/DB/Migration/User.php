@@ -62,8 +62,9 @@ class User
             $checkAdminExists = $this->conn->query("SELECT * FROM users WHERE userName='admin'")->rowCount() > 0;
 
             if (!$checkAdminExists) {
-                $createAdmin = "INSERT INTO users (userName, userEmail, userPw, departmentIdx, userStatus, userInit, userPhone)
-                                            VALUES('admin', 'admin', :userPw, 7, '관리자', '1', '010-6630-7548');";
+                $createAdmin = "INSERT INTO users (userName, userEmail, userPw, departmentIdx, userStatus, userInit, userPhone) VALUES
+                                                        ('admin', 'admin', :userPw, 7, '관리자', '1', '010-6630-7548'),
+                                                        ('테스트', 'yoon7548@gmail.com', :userPw, 7, '관리자', '1', '010-6630-7548');";
                 $stmt = $this->conn->prepare($createAdmin);
                 $stmt->bindParam('userPw', $userPw);
                 $stmt->execute();

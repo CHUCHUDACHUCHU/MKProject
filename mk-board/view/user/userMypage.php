@@ -19,7 +19,7 @@ include __DIR__ . '/../part/nav.php';
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#emailChangeModal"><span>이메일변경</span></button>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#passwordChangeModal"><span>비밀번호변경</span></button>
             </div>
-            <form action="/mk-board/user/update/all" method="post">
+            <form action="/mk-board/user/update/info" method="post">
                 <div class="form-group mb-1">
                     <label class="mb-1" style="font-weight: bold">이름</label>
                     <input type="text" class="form-control mb-1"  value="<?=$nowUser['userName']?>" name="userName">
